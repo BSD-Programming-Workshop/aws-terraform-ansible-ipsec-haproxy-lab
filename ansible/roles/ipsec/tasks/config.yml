@@ -1,0 +1,44 @@
+- name: install packages
+  community.general.pkgng:
+    name:
+      - vim
+      - strongswan
+    state: latest
+  become: yes
+
+- name: Routing settings
+  template:
+    src: routing
+    dest: /etc/rc.conf.d/routing
+  become: yes
+
+- name: Strongswan settings
+  template:
+    src: strongswan
+    dest: /etc/rc.conf.d/strongswan
+  become: yes
+
+- name: Add in the ipsec.conf
+  template:
+    src: ipsec.conf
+    dest: /usr/local/etc/ipsec.conf
+  become: yes
+
+- name: Add in the ipsec.secrets
+  template:
+    src: ipsec.secrets
+    dest: /usr/local/etc/ipsec.secrets
+  become: yes
+
+- name: setup ipsec
+  community.general.sysrc:
+    name: strongswan_enable
+    value: "YES"
+  become: yes
+
+- name: Start the strongSwan service
+  service:
+    name: strongswan
+    state: started
+  become: yes
+

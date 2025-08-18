@@ -1,0 +1,6 @@
+python_version: "3.11"
+lab_cidr: "10.66.6.0/24"
+lab_public_ip: "142.197.198.122"
+aws_public_ip: "52.33.31.35"
+aws_private_ip_subnet: "172.60.51.131/32"
+
