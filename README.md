@@ -126,9 +126,14 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
 2. **Deploy AWS Organizations and accounts**:
    ```bash
    export AWS_PROFILE=bootstrap
-   terraform init -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET"
+   export AWS_DEFAULT_REGION=us-west-2  # Optional: if not already set in AWS CLI
+   terraform init \
+     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
+     -backend-config="key=phase1-foundation/terraform.tfstate" \
+     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
+     -backend-config="encrypt=true"
    terraform apply
-   # Note the account IDs from outputs - you'll need these for Phase 3
+   # Note the account IDs from outputs - you'll need these for Phase 2
    ```
 
 ### Phase 2: Deploy Security Configuration
@@ -137,7 +142,12 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    ```bash
    cd ../phase2-security
    export AWS_PROFILE=bootstrap
-   terraform init -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET"
+   terraform init \
+     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
+     -backend-config="key=phase2-security/terraform.tfstate" \
+     -backend-config="region=us-west-2" \
+     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
+     -backend-config="encrypt=true"
    terraform apply
    # This creates: LandingZoneAdministrators group, MFA policies, cross-account roles
    ```
@@ -204,7 +214,12 @@ Choose your target environment (dev/staging/prod):
 2. **Deploy workload infrastructure** (uses cross-account role to target account):
    ```bash
    # Use default profile with MFA session tokens
-   terraform init -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET"
+   terraform init \
+     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
+     -backend-config="key=environments/dev/terraform.tfstate" \
+     -backend-config="region=us-west-2" \
+     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
+     -backend-config="encrypt=true"
    terraform apply
    # Deploys FreeBSD instance by default
    # If rhel_ami_id is set, also deploys RHEL instance in same VPC
