@@ -1,0 +1,34 @@
+# OS Detection and Configuration Variables
+# This file contains variables for OS-specific configuration
+
+# Default package managers by OS
+package_managers:
+  freebsd: pkg
+  rhel: yum
+
+# Default service managers by OS
+service_managers:
+  freebsd: service
+  rhel: systemctl
+
+# Python package names by OS
+python_packages:
+  freebsd: python311
+  rhel: python3
+
+# IPSec package names by OS
+ipsec_packages:
+  freebsd: 
+    - strongswan
+  rhel:
+    - libreswan
+
+# Configuration file paths by OS
+ipsec_config_paths:
+  freebsd: /usr/local/etc/ipsec.conf
+  rhel: /etc/ipsec.conf
+
+# Service names by OS
+ipsec_service_names:
+  freebsd: strongswan
+  rhel: ipsec

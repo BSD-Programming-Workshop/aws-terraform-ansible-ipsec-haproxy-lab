@@ -1,2 +1,66 @@
-# include other YAML files with tasks here
-- import_tasks: config.yml
+---
+# Include OS detection role
+- name: Include OS detection
+  include_role:
+    name: os-detection
+  tags: always
+
+# Install IPSec packages based on detected OS
+- name: Install IPSec packages (FreeBSD)
+  pkgng:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ipsec_packages }}"
+  become: yes
+  when: detected_os == "freebsd"
+
+- name: Install IPSec packages (RHEL)
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ipsec_packages }}"
+  become: yes
+  when: detected_os == "rhel"
+
+# Enable IPSec service
+- name: Enable IPSec service
+  service:
+    name: "{{ ipsec_service_name }}"
+    enabled: yes
+  become: yes
+
+# Configure IPSec
+- name: Configure IPSec
+  template:
+    src: ipsec.conf.j2
+    dest: "{{ ipsec_config_path }}"
+    backup: yes
+  become: yes
+  notify: restart ipsec
+
+- name: Configure IPSec secrets (FreeBSD)
+  template:
+    src: ipsec.secrets.j2
+    dest: /usr/local/etc/ipsec.secrets
+    mode: '0600'
+    backup: yes
+  become: yes
+  when: detected_os == "freebsd"
+  notify: restart ipsec
+
+- name: Configure IPSec secrets (RHEL)
+  template:
+    src: ipsec.secrets.j2
+    dest: /etc/ipsec.secrets
+    mode: '0600'
+    backup: yes
+  become: yes
+  when: detected_os == "rhel"
+  notify: restart ipsec
+
+# Start IPSec service
+- name: Start IPSec service
+  service:
+    name: "{{ ipsec_service_name }}"
+    state: started
+  become: yes

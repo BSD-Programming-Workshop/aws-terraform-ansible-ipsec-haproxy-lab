@@ -1,0 +1,32 @@
+# Phase 1 Foundation Configuration
+# Copy this to terraform.tfvars and customize for your organization
+
+# Organization Configuration
+organization_name = "FreeBSD-Organization"
+home_region      = "us-west-2"
+governed_regions = ["us-west-2", "us-east-1"]
+
+# Logging Configuration
+log_retention_days        = 365
+access_log_retention_days = 90
+
+# Account Email Addresses (MUST be unique across all AWS)
+# You need 7 unique email addresses total for all accounts
+# 
+# Proton Pass Aliases (Recommended):
+# Create aliases in Proton Pass that forward to your main Proton email
+# aws-log-archive@[your-alias-domain]
+# aws-audit@[your-alias-domain]
+# aws-security@[your-alias-domain]
+# aws-dev@[your-alias-domain]
+# aws-staging@[your-alias-domain]
+# aws-prod@[your-alias-domain]
+# aws-network@[your-alias-domain]
+
+log_archive_email      = "aws-log-archive@your-alias-domain.com"
+audit_email           = "aws-audit@your-alias-domain.com"
+security_tooling_email = "aws-security@your-alias-domain.com"
+freebsd_dev_email     = "aws-dev@your-alias-domain.com"
+freebsd_staging_email = "aws-staging@your-alias-domain.com"
+freebsd_prod_email    = "aws-prod@your-alias-domain.com"
+network_email         = "aws-network@your-alias-domain.com"

@@ -1,0 +1,57 @@
+---
+# OS Detection and Setup Tasks
+# This role detects the operating system and sets up OS-specific variables
+
+- name: Gather system facts
+  setup:
+  tags: always
+
+- name: Set OS family variable
+  set_fact:
+    detected_os: "{{ ansible_os_family | lower }}"
+  tags: always
+
+- name: Set specific OS for FreeBSD
+  set_fact:
+    detected_os: "freebsd"
+  when: ansible_system == "FreeBSD"
+  tags: always
+
+- name: Set specific OS for RHEL
+  set_fact:
+    detected_os: "rhel"
+  when: ansible_os_family == "RedHat"
+  tags: always
+
+- name: Display detected operating system
+  debug:
+    msg: "Detected OS: {{ detected_os }}"
+  tags: always
+
+- name: Set OS-specific variables
+  set_fact:
+    package_manager: "{{ package_managers[detected_os] | default('unknown') }}"
+    service_manager: "{{ service_managers[detected_os] | default('unknown') }}"
+    python_package: "{{ python_packages[detected_os] | default('python3') }}"
+    ipsec_packages: "{{ ipsec_packages[detected_os] | default([]) }}"
+    ipsec_config_path: "{{ ipsec_config_paths[detected_os] | default('/etc/ipsec.conf') }}"
+    ipsec_service_name: "{{ ipsec_service_names[detected_os] | default('ipsec') }}"
+  tags: always
+
+- name: Validate OS support
+  fail:
+    msg: "Unsupported operating system: {{ detected_os }}. Only FreeBSD and RHEL are supported."
+  when: detected_os not in ["freebsd", "rhel"]
+  tags: always
+
+- name: Display OS configuration
+  debug:
+    msg: |
+      OS Configuration:
+      - Package Manager: {{ package_manager }}
+      - Service Manager: {{ service_manager }}
+      - Python Package: {{ python_package }}
+      - IPSec Packages: {{ ipsec_packages | join(', ') }}
+      - IPSec Config Path: {{ ipsec_config_path }}
+      - IPSec Service: {{ ipsec_service_name }}
+  tags: always
