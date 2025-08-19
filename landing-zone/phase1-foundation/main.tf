@@ -163,7 +163,7 @@ resource "aws_controltower_landing_zone" "main" {
 resource "aws_organizations_account" "log_archive" {
   name                       = "Log Archive"
   email                      = var.log_archive_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.security.id
 
   tags = {
@@ -181,7 +181,7 @@ resource "aws_organizations_account" "log_archive" {
 resource "aws_organizations_account" "audit" {
   name                       = "Audit"
   email                      = var.audit_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.security.id
 
   tags = {
@@ -199,7 +199,7 @@ resource "aws_organizations_account" "audit" {
 resource "aws_organizations_account" "security_tooling" {
   name                       = "Security Tooling"
   email                      = var.security_tooling_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.security.id
 
   tags = {
@@ -217,7 +217,7 @@ resource "aws_organizations_account" "security_tooling" {
 resource "aws_organizations_account" "unix_dev" {
   name                       = "Unix Dev"
   email                      = var.unix_dev_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.workloads.id
 
   tags = {
@@ -236,7 +236,7 @@ resource "aws_organizations_account" "unix_dev" {
 resource "aws_organizations_account" "unix_staging" {
   name                       = "Unix Staging"
   email                      = var.unix_staging_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.workloads.id
 
   tags = {
@@ -255,7 +255,7 @@ resource "aws_organizations_account" "unix_staging" {
 resource "aws_organizations_account" "unix_prod" {
   name                       = "Unix Prod"
   email                      = var.unix_prod_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.workloads.id
 
   tags = {
@@ -274,7 +274,7 @@ resource "aws_organizations_account" "unix_prod" {
 resource "aws_organizations_account" "network" {
   name                       = "Network"
   email                      = var.network_email
-  iam_user_access_to_billing = "DENY"
+  # iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.shared_services.id
 
   tags = {
