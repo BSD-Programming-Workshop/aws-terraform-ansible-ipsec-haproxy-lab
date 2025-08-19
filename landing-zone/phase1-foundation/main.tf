@@ -9,6 +9,15 @@ terraform {
     }
   }
   required_version = ">= 1.0"
+  
+  backend "s3" {
+    # Backend configuration provided via -backend-config
+    # bucket         = "terraform-state-project-wray06ia"
+    # key            = "phase1-foundation/terraform.tfstate"
+    # region         = "us-west-2"
+    # dynamodb_table = "terraform-locks-project"
+    # encrypt        = true
+  }
 }
 
 provider "aws" {
