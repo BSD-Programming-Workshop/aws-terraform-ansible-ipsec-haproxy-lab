@@ -42,12 +42,6 @@ resource "aws_organizations_organization" "main" {
     "SERVICE_CONTROL_POLICY",
     "TAG_POLICY"
   ]
-
-  tags = {
-    Name        = "${var.organization_name} Organization"
-    Environment = "management"
-    Purpose     = "root-organization"
-  }
 }
 
 # Security OU
