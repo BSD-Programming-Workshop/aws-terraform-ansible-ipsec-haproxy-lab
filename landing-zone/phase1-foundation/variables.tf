@@ -15,7 +15,7 @@ variable "home_region" {
 variable "governed_regions" {
   description = "List of regions governed by Control Tower"
   type        = list(string)
-  default     = ["us-west-2", "us-east-1"]
+  default     = ["us-east-1"]
 }
 
 variable "log_retention_days" {
