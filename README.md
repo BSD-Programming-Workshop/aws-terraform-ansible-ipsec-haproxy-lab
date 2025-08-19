@@ -117,6 +117,11 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    cp terraform.tfvars.example terraform.tfvars
    # Edit terraform.tfvars with your unique email addresses
    ```
+   
+   **Note**: The `governed_regions` includes both `us-west-2` (your primary region) and `us-east-1`. This is because:
+   - AWS Control Tower requires `us-east-1` for many global services (IAM, CloudFront, Route 53)
+   - Centralized logging and compliance features work better with `us-east-1` governed
+   - No additional cost - just extends guardrails and policies to both regions
 
 2. **Deploy AWS Organizations and accounts**:
    ```bash
