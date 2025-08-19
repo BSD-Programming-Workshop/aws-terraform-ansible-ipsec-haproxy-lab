@@ -68,9 +68,9 @@ output "network_account_id" {
 }
 
 # Control Tower
-output "control_tower_landing_zone_identifier" {
-  description = "Control Tower Landing Zone identifier"
-  value       = aws_controltower_landing_zone.main.identifier
+output "control_tower_landing_zone_arn" {
+  description = "Control Tower Landing Zone ARN"
+  value       = aws_controltower_landing_zone.main.arn
 }
 
 # Account mapping for cross-account access
