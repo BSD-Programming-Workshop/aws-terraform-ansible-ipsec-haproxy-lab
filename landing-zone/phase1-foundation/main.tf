@@ -172,17 +172,17 @@ resource "aws_organizations_account" "security_tooling" {
   }
 }
 
-# FreeBSD Dev Account
-resource "aws_organizations_account" "freebsd_dev" {
-  name                       = "FreeBSD Dev"
-  email                      = var.freebsd_dev_email
+# Unix Dev Account
+resource "aws_organizations_account" "unix_dev" {
+  name                       = "Unix Dev"
+  email                      = var.unix_dev_email
   iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.workloads.id
 
   tags = {
-    Name        = "FreeBSD Dev Account"
+    Name        = "Unix Dev Account"
     Environment = "development"
-    Purpose     = "freebsd-development"
+    Purpose     = "unix-development"
     Workload    = "ipsec-server"
   }
 
@@ -191,17 +191,17 @@ resource "aws_organizations_account" "freebsd_dev" {
   }
 }
 
-# FreeBSD Staging Account
-resource "aws_organizations_account" "freebsd_staging" {
-  name                       = "FreeBSD Staging"
-  email                      = var.freebsd_staging_email
+# Unix Staging Account
+resource "aws_organizations_account" "unix_staging" {
+  name                       = "Unix Staging"
+  email                      = var.unix_staging_email
   iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.workloads.id
 
   tags = {
-    Name        = "FreeBSD Staging Account"
+    Name        = "Unix Staging Account"
     Environment = "staging"
-    Purpose     = "freebsd-staging"
+    Purpose     = "unix-staging"
     Workload    = "ipsec-server"
   }
 
@@ -210,17 +210,17 @@ resource "aws_organizations_account" "freebsd_staging" {
   }
 }
 
-# FreeBSD Prod Account
-resource "aws_organizations_account" "freebsd_prod" {
-  name                       = "FreeBSD Prod"
-  email                      = var.freebsd_prod_email
+# Unix Prod Account
+resource "aws_organizations_account" "unix_prod" {
+  name                       = "Unix Prod"
+  email                      = var.unix_prod_email
   iam_user_access_to_billing = "DENY"
   parent_id                  = aws_organizations_organizational_unit.workloads.id
 
   tags = {
-    Name        = "FreeBSD Prod Account"
+    Name        = "Unix Prod Account"
     Environment = "production"
-    Purpose     = "freebsd-production"
+    Purpose     = "unix-production"
     Workload    = "ipsec-server"
   }
 

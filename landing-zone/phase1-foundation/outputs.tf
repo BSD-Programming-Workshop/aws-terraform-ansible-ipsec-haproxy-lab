@@ -47,19 +47,19 @@ output "security_tooling_account_id" {
   value       = aws_organizations_account.security_tooling.id
 }
 
-output "freebsd_dev_account_id" {
-  description = "FreeBSD Dev account ID"
-  value       = aws_organizations_account.freebsd_dev.id
+output "unix_dev_account_id" {
+  description = "Unix Dev account ID"
+  value       = aws_organizations_account.unix_dev.id
 }
 
-output "freebsd_staging_account_id" {
-  description = "FreeBSD Staging account ID"
-  value       = aws_organizations_account.freebsd_staging.id
+output "unix_staging_account_id" {
+  description = "Unix Staging account ID"
+  value       = aws_organizations_account.unix_staging.id
 }
 
-output "freebsd_prod_account_id" {
-  description = "FreeBSD Prod account ID"
-  value       = aws_organizations_account.freebsd_prod.id
+output "unix_prod_account_id" {
+  description = "Unix Prod account ID"
+  value       = aws_organizations_account.unix_prod.id
 }
 
 output "network_account_id" {
@@ -81,9 +81,9 @@ output "account_mapping" {
     log_archive      = aws_organizations_account.log_archive.id
     audit           = aws_organizations_account.audit.id
     security_tooling = aws_organizations_account.security_tooling.id
-    freebsd_dev     = aws_organizations_account.freebsd_dev.id
-    freebsd_staging = aws_organizations_account.freebsd_staging.id
-    freebsd_prod    = aws_organizations_account.freebsd_prod.id
+    unix_dev     = aws_organizations_account.unix_dev.id
+    unix_staging = aws_organizations_account.unix_staging.id
+    unix_prod    = aws_organizations_account.unix_prod.id
     network         = aws_organizations_account.network.id
   }
 }

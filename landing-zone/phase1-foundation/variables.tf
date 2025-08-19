@@ -49,22 +49,22 @@ variable "security_tooling_email" {
   # Example: "aws-security-tooling@yourdomain.com"
 }
 
-variable "freebsd_dev_email" {
-  description = "Email address for FreeBSD Dev account"
+variable "unix_dev_email" {
+  description = "Email address for Unix Dev account"
   type        = string
-  # Example: "aws-freebsd-dev@yourdomain.com"
+  # Example: "aws-dev@yourdomain.com"
 }
 
-variable "freebsd_staging_email" {
-  description = "Email address for FreeBSD Staging account"
+variable "unix_staging_email" {
+  description = "Email address for Unix Staging account"
   type        = string
-  # Example: "aws-freebsd-staging@yourdomain.com"
+  # Example: "aws-staging@yourdomain.com"
 }
 
-variable "freebsd_prod_email" {
-  description = "Email address for FreeBSD Prod account"
+variable "unix_prod_email" {
+  description = "Email address for Unix Prod account"
   type        = string
-  # Example: "aws-freebsd-prod@yourdomain.com"
+  # Example: "aws-prod@yourdomain.com"
 }
 
 variable "network_email" {

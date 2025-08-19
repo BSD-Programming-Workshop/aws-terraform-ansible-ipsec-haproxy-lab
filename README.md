@@ -79,7 +79,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
 
 ## Deployment Workflow
 
-### Phase 1: Bootstrap Backend
+### Bootstrap Backend
 
 1. **Create initial AWS CLI configuration**:
    
@@ -109,7 +109,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    cd ..
    ```
 
-### Phase 2: Deploy Landing Zone Foundation
+### Phase 1: Deploy Landing Zone Foundation
 
 1. **Configure foundation variables**:
    ```bash
@@ -126,7 +126,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    # Note the account IDs from outputs - you'll need these for Phase 3
    ```
 
-### Phase 3: Deploy Security Configuration
+### Phase 2: Deploy Security Configuration
 
 1. **Deploy cross-account roles and MFA policies**:
    ```bash
@@ -179,7 +179,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    # Copy returned credentials to [profile default] section
    ```
 
-### Phase 4: Deploy Workloads to Isolated Accounts
+### Phase 3: Deploy Workloads to Isolated Accounts
 
 **Note**: After Control Tower deployment, you use cross-account roles instead of direct credentials. Network and DNS accounts are created but not used in the current implementation. Each workload creates its own VPC for maximum isolation.
 
