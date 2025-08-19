@@ -91,7 +91,10 @@ resource "aws_iam_role" "control_tower_admin" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "controltower.amazonaws.com"
+          Service = [
+            "controltower.amazonaws.com",
+            "cloudformation.amazonaws.com"
+          ]
         }
       }
     ]
@@ -104,9 +107,14 @@ resource "aws_iam_role" "control_tower_admin" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "control_tower_admin" {
+resource "aws_iam_role_policy_attachment" "control_tower_admin_service" {
   role       = aws_iam_role.control_tower_admin.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSControlTowerServiceRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "control_tower_admin_full" {
+  role       = aws_iam_role.control_tower_admin.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 # Control Tower Landing Zone
