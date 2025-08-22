@@ -3,8 +3,8 @@
 
 # Project configuration
 project_name = "unix-workload"
-aws_region   = "us-west-2"
-availability_zone = "us-west-2a"
+aws_region   = "us-east-1"
+availability_zone = "us-east-1a"
 
 # RHEL Configuration (optional - leave null to deploy only FreeBSD)
 rhel_ami_id = null  # Set to RHEL AMI ID to enable RHEL instance: "ami-1234567890abcdef0"

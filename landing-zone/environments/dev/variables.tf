@@ -15,20 +15,20 @@ variable "rhel_ami_id" {
 variable "availability_zone_rhel" {
   description = "Availability zone for RHEL instance (different from FreeBSD for testing)"
   type        = string
-  default     = "us-west-2b"
+  default     = "us-east-1b"
 }
 
 
 variable "aws_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "availability_zone" {
   description = "Availability zone for resources"
   type        = string
-  default     = "us-west-2a"
+  default     = "us-east-1a"
 }
 
 variable "dev_account_id" {

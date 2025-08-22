@@ -9,7 +9,7 @@ variable "organization_name" {
 variable "home_region" {
   description = "Primary AWS region for Control Tower"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "governed_regions" {

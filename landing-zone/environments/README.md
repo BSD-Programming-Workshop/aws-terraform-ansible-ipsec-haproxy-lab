@@ -47,7 +47,7 @@ For each environment (dev/staging/prod):
    ```bash
    terraform init -backend-config="bucket=your-terraform-state-bucket" \
                   -backend-config="key=landing-zone/environments/dev/terraform.tfstate" \
-                  -backend-config="region=us-west-2"
+                  -backend-config="region=us-east-1"
    ```
 
 4. **Deploy infrastructure**:

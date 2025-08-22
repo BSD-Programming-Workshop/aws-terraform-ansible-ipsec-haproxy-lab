@@ -14,7 +14,7 @@ terraform {
     # Backend configuration will be provided via backend config file
     # bucket = "your-terraform-state-bucket"
     # key    = "landing-zone/environments/dev/terraform.tfstate"
-    # region = "us-west-2"
+    # region = "us-east-1"
   }
 }
 

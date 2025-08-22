@@ -3,8 +3,8 @@
 
 # Project configuration
 project_name = "unix-workload"
-aws_region   = "us-west-2"
-availability_zone = "us-west-2a"
+aws_region   = "us-east-1"
+availability_zone = "us-east-1a"
 
 # Operating System Configuration
 operating_system = "freebsd"  # Options: "freebsd" or "rhel"

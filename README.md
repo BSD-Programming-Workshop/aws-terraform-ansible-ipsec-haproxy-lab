@@ -88,13 +88,13 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    Then create `~/.aws/config` with your admin user credentials:
    ```ini
    [profile bootstrap]
-   region = us-west-2
+   region = us-east-1
    output = json
    aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
    aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
    
    [profile default]
-   region = us-west-2
+   region = us-east-1
    output = json
    # Will be updated in Phase 3 for MFA workflow
    ```
@@ -118,7 +118,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    # Edit terraform.tfvars with your unique email addresses
    ```
    
-   **Note**: The `governed_regions` includes both `us-west-2` (your primary region) and `us-east-1`. This is because:
+   **Note**: The `governed_regions` includes both `us-east-1` (your primary region) and `us-east-1`. This is because:
    - AWS Control Tower requires `us-east-1` for many global services (IAM, CloudFront, Route 53)
    - Centralized logging and compliance features work better with `us-east-1` governed
    - No additional cost - just extends guardrails and policies to both regions
@@ -126,7 +126,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
 2. **Deploy AWS Organizations and accounts**:
    ```bash
    export AWS_PROFILE=bootstrap
-   export AWS_DEFAULT_REGION=us-west-2  # Optional: if not already set in AWS CLI
+   export AWS_DEFAULT_REGION=us-east-1  # Optional: if not already set in AWS CLI
    terraform init \
      -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
      -backend-config="key=phase1-foundation/terraform.tfstate" \
@@ -145,7 +145,7 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    terraform init \
      -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
      -backend-config="key=phase2-security/terraform.tfstate" \
-     -backend-config="region=us-west-2" \
+     -backend-config="region=us-east-1" \
      -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
      -backend-config="encrypt=true"
    terraform apply
@@ -166,19 +166,19 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    Set up MFA device via AWS Console for your admin user, then update `~/.aws/config`:
    ```ini
    [profile bootstrap]
-   region = us-west-2
-   output = json
-   aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
-   aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
-   
-   [profile mfa]
-   region = us-west-2
-   output = json
-   aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
-   aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
-   
-   [profile default]
-   region = us-west-2
+  region = us-east-1
+  output = json
+  aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
+  aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
+  
+  [profile mfa]
+  region = us-east-1
+  output = json
+  aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
+  aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
+  
+  [profile default]
+  region = us-east-1
    output = json
    # Temporary MFA session tokens go here (updated daily)
    ```
@@ -217,7 +217,7 @@ Choose your target environment (dev/staging/prod):
    terraform init \
      -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
      -backend-config="key=environments/dev/terraform.tfstate" \
-     -backend-config="region=us-west-2" \
+     -backend-config="region=us-east-1" \
      -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
      -backend-config="encrypt=true"
    terraform apply
@@ -243,7 +243,7 @@ The dev environment supports deploying both FreeBSD and RHEL instances simultane
 - **FreeBSD instance**: Always deployed (uses AWS SSM parameter for AMI)
 - **RHEL instance**: Optional - set `rhel_ami_id` in `terraform.tfvars` to enable
 - **Same VPC**: Both instances share networking resources
-- **Different AZs**: FreeBSD in us-west-2a, RHEL in us-west-2b
+- **Different AZs**: FreeBSD in us-east-1a, RHEL in us-east-1b
 - **Unified Ansible**: Single playbook configures both OS types automatically
 
 ## Operating System Support
@@ -309,11 +309,11 @@ After completing all phases, your daily workflow uses your existing admin user w
 2. **Update `~/.aws/config` with returned credentials**:
    ```ini
    [profile default]
-   region = us-west-2
-   output = json
-   aws_access_key_id = RETURNED_ACCESS_KEY_ID
-   aws_secret_access_key = RETURNED_SECRET_ACCESS_KEY
-   aws_session_token = RETURNED_SESSION_TOKEN
+  region = us-east-1
+  output = json
+  aws_access_key_id = RETURNED_ACCESS_KEY_ID
+  aws_secret_access_key = RETURNED_SECRET_ACCESS_KEY
+  aws_session_token = RETURNED_SESSION_TOKEN
    ```
 
 3. **Deploy to any environment**:

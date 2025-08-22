@@ -14,7 +14,7 @@ terraform {
     # Backend configuration provided via -backend-config
     # bucket         = "terraform-state-project-wray06ia"
     # key            = "phase1-foundation/terraform.tfstate"
-    # region         = "us-west-2"
+    # region         = "us-east-1"
     # dynamodb_table = "terraform-locks-project"
     # encrypt        = true
   }

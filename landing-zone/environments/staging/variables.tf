@@ -27,13 +27,13 @@ variable "workload_type" {
 variable "aws_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "availability_zone" {
   description = "Availability zone for resources"
   type        = string
-  default     = "us-west-2a"
+  default     = "us-east-1a"
 }
 
 variable "staging_account_id" {

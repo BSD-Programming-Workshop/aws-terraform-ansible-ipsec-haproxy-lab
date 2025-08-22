@@ -3,8 +3,8 @@
 
 # Organization Configuration
 organization_name = "Unix-Organization"
-home_region      = "us-west-2"
-governed_regions = ["us-west-2", "us-east-1"]
+home_region      = "us-east-1"
+governed_regions = ["us-east-1"]
 
 # Logging Configuration
 log_retention_days        = 365

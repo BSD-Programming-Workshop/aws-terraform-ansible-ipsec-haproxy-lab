@@ -3,7 +3,7 @@
 variable "home_region" {
   description = "Primary AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "terraform_state_bucket" {
