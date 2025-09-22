@@ -234,6 +234,7 @@ resource "aws_organizations_account" "unix_dev" {
 
 # Unix Staging Account
 resource "aws_organizations_account" "unix_staging" {
+  count                      = 0  # Deferred for tutorial cost control
   name                       = "Unix Staging"
   email                      = var.unix_staging_email
   # iam_user_access_to_billing = "DENY"
@@ -253,6 +254,7 @@ resource "aws_organizations_account" "unix_staging" {
 
 # Unix Prod Account
 resource "aws_organizations_account" "unix_prod" {
+  count                      = 0  # Deferred for tutorial cost control
   name                       = "Unix Prod"
   email                      = var.unix_prod_email
   # iam_user_access_to_billing = "DENY"
@@ -272,6 +274,7 @@ resource "aws_organizations_account" "unix_prod" {
 
 # Network Account
 resource "aws_organizations_account" "network" {
+  count                      = 0  # Deferred for tutorial cost control
   name                       = "Network"
   email                      = var.network_email
   # iam_user_access_to_billing = "DENY"

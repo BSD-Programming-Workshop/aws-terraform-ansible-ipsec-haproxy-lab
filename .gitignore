@@ -38,3 +38,6 @@ Thumbs.db
 *.pem
 *.key
 id_rsa*
+
+# Local docs (slides/tutorial drafts)
+docs/

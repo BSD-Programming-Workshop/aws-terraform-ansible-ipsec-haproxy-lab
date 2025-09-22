@@ -39,6 +39,10 @@ variable "availability_zone" {
 variable "prod_account_id" {
   description = "AWS Account ID for production environment"
   type        = string
+  validation {
+    condition     = can(regex("^\\d{12}$", var.prod_account_id))
+    error_message = "prod_account_id must be a 12-digit AWS account ID. Tip: run 'terraform output unix_prod_account_id' in landing-zone/phase1-foundation. If it is null, enable the Prod account in Phase 1 (see README 'Enable Staging/Prod/Network later')."
+  }
 }
 
 # Networking variables

@@ -2,6 +2,18 @@
 
 This project creates a secure, scalable AWS Landing Zone using Control Tower with isolated accounts for deploying Unix workloads (FreeBSD or RHEL) configured with IPSec.
 
+## EuroBSDCon Tutorial Guide
+
+For a condensed student handout used during the EuroBSDCon session, see:
+
+- `docs/eurobsdcon-tutorial.md`
+
+## At a glance
+
+- `landing-zone/environments/README.md` — environment deployments
+- `landing-zone/modules/unix-workload/` — reusable module
+- `docs/eurobsdcon-slides.md` — slide deck (Marp)
+
 ## Architecture Overview
 
 ```
@@ -38,18 +50,25 @@ Root Organization (Management Account)
 2. **AWS CLI installed** (version 2.0+)
 3. **Terraform installed** (version 1.0+)
 4. **Ansible installed** with Python support
-5. **7 unique email addresses** for AWS accounts (see Email Setup below)
+5. **4 unique email addresses** for AWS accounts for this tutorial (Log Archive, Audit, Security Tooling, Unix Dev). If you later enable Staging, Prod, and Network, you'll need 3 additional emails (total 7). See Email Setup below.
 6. **MFA device** for secure access
 
 ## Email Address Setup
 
-AWS requires a unique email address for each account. You need **7 email addresses total**:
+AWS requires a unique email address for each account.
 
-### **Required Email Addresses**:
-1. `log-archive@yourdomain.com` - Log Archive Account (auto-created by Control Tower)
-2. `audit@yourdomain.com` - Audit Account (auto-created by Control Tower)  
+For this tutorial (cost-controlled), Phase 1 creates only:
+- Log Archive, Audit, Security Tooling, Unix Dev
+
+So you need **4 email addresses** now. If you later enable Staging, Prod, and Network, add 3 more unique emails (total 7).
+
+### **Required Email Addresses (Tutorial Scope)**:
+1. `log-archive@yourdomain.com` - Log Archive Account (Control Tower logging)
+2. `audit@yourdomain.com` - Audit Account (Control Tower security)
 3. `security-tooling@yourdomain.com` - Security Tooling Account
 4. `unix-dev@yourdomain.com` - Unix Dev Account
+
+### **Additional Emails (Enable Later if Needed)**:
 5. `unix-staging@yourdomain.com` - Unix Staging Account
 6. `unix-prod@yourdomain.com` - Unix Production Account
 7. `network@yourdomain.com` - Network Account
@@ -76,6 +95,7 @@ If you use Gmail, use plus addressing:
 
 ### **Where to Configure**:
 Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses.
+Note: Staging, Prod, and Network accounts are deferred by default for this tutorial; you can enable them later and add their emails then.
 
 ## Deployment Workflow
 
@@ -118,15 +138,15 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
    # Edit terraform.tfvars with your unique email addresses
    ```
    
-   **Note**: The `governed_regions` includes both `us-east-1` (your primary region) and `us-east-1`. This is because:
+   **Note**: The `governed_regions` includes a list of regions. We're using only `us-east-1` (the primary region). This is because:
    - AWS Control Tower requires `us-east-1` for many global services (IAM, CloudFront, Route 53)
    - Centralized logging and compliance features work better with `us-east-1` governed
-   - No additional cost - just extends guardrails and policies to both regions
+   - No additional cost - just extends guardrails and policies to listed regions
 
 2. **Deploy AWS Organizations and accounts**:
    ```bash
    export AWS_PROFILE=bootstrap
-   export AWS_DEFAULT_REGION=us-east-1  # Optional: if not already set in AWS CLI
+   export AWS_DEFAULT_REGION=us-east-1
    terraform init \
      -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
      -backend-config="key=phase1-foundation/terraform.tfstate" \
@@ -134,6 +154,28 @@ Edit `landing-zone/phase1-foundation/terraform.tfvars` with your email addresses
      -backend-config="encrypt=true"
    terraform apply
    # Note the account IDs from outputs - you'll need these for Phase 2
+   ```
+
+   Note: For this tutorial, Phase 1 creates Log Archive, Audit, Security Tooling, and Unix Dev accounts. Unix Staging, Unix Prod, and Network are deferred by default for cost control and can be enabled later.
+
+   Enable Staging/Prod/Network later:
+
+   1) In `landing-zone/phase1-foundation/main.tf`, remove or comment out `count = 0` on these resources:
+   - `aws_organizations_account.unix_staging`
+   - `aws_organizations_account.unix_prod`
+   - `aws_organizations_account.network`
+
+   2) Add their emails to `landing-zone/phase1-foundation/terraform.tfvars`.
+
+   3) Re-apply Phase 1 from `landing-zone/phase1-foundation/` with the same backend settings:
+
+   ```bash
+   terraform init \
+     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
+     -backend-config="key=phase1-foundation/terraform.tfstate" \
+     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
+     -backend-config="encrypt=true"
+   terraform apply
    ```
 
 ### Phase 2: Deploy Security Configuration
@@ -264,6 +306,15 @@ operating_system = "rhel"
 custom_ami_id    = "ami-0123456789abcdef0"
 ```
 
+### Tip: RHEL Gold Images via Red Hat Portal
+
+If you use Red Hat gold images, the AMI IDs must be shared to your specific AWS account ID(s) and region(s) from the Red Hat portal.
+
+- Set `custom_ami_id` (or `rhel_ami_id` in the dev environment) in the environment's `terraform.tfvars`.
+- Ensure the AMI is shared with the exact account ID you are deploying to (e.g., `unix_dev_account_id`).
+- Verify the AMI exists in `us-east-1` (or your selected region).
+- Red Hat documentation for this feature is sparse; coordinate with Red Hat support if needed to enable the AMI sharing to your AWS account.
+
 ## Environment Isolation
 
 Each environment deploys to isolated AWS accounts:
@@ -291,6 +342,64 @@ ssh -i ~/.ssh/your-key ec2-user@INSTANCE-IP
 - **Encrypted Storage**: EBS volumes encrypted at rest
 - **Network Security**: Restrictive security groups and VPC isolation
 - **No Long-Lived Credentials**: All access via temporary session tokens
+  
+## Access Model (No Per-Account Passwords Needed)
+
+For day-to-day operations and for this workshop, you do not need passwords for each member account. You operate from the management account using an IAM user with MFA, then assume cross-account roles into member accounts.
+
+- You authenticate to the management account with MFA.
+- Terraform (and AWS CLI) then assumes `CrossAccountAdminRole` in target accounts as needed.
+- No IAM users or passwords are required in the member accounts.
+
+This model reduces credential sprawl and keeps control centralized while maintaining least-privilege via role assumptions.
+
+### Console: Switch Role into Member Accounts
+
+You can switch roles directly in the AWS Console from the management account:
+
+1. Sign in to the management account console with your IAM user and MFA.
+2. In the top-right user menu, choose `Switch Role`.
+3. Enter:
+   - Account: target account ID (e.g., from Phase 1 outputs: `unix_dev_account_id`, `unix_staging_account_id`, `unix_prod_account_id`)
+   - Role: `CrossAccountAdminRole`
+   - Optional: Display name and color
+4. Click `Switch Role`.
+
+Quick-switch bookmarks (replace ACCOUNT_ID):
+
+```
+https://signin.aws.amazon.com/switchrole?account=ACCOUNT_ID&roleName=CrossAccountAdminRole&displayName=Unix-Dev
+https://signin.aws.amazon.com/switchrole?account=ACCOUNT_ID&roleName=CrossAccountAdminRole&displayName=Unix-Staging
+https://signin.aws.amazon.com/switchrole?account=ACCOUNT_ID&roleName=CrossAccountAdminRole&displayName=Unix-Prod
+```
+
+Notes:
+
+- MFA is required by policy and trust. Ensure you signed in with MFA.
+- We enforce `aws:MultiFactorAuthAge < 3600` in the trust policy. If your MFA session is older than ~1 hour, re-auth with MFA and try again.
+
+Get account IDs from Terraform outputs:
+
+```bash
+# Run in the phase1 state directory (this state holds the account IDs):
+cd landing-zone/phase1-foundation
+
+# If needed, re-init with the same backend settings you used during apply
+# (bucket/key/dynamodb_table/region). Then:
+terraform output unix_dev_account_id
+terraform output unix_staging_account_id
+terraform output unix_prod_account_id
+```
+
+## Optional: Root User Hardening (Post-Lab)
+
+Each AWS account has a root user tied to its unique email address. Root is not used in normal operations, but should be hardened after the lab:
+
+1. Set a long, random root password (use the password reset flow to the account email/alias).
+2. Enable MFA on the root user (hardware MFA preferred).
+3. Record recovery contacts and security questions where applicable.
+4. Store secrets securely in a password manager (e.g., Proton Pass, 1Password, Bitwarden).
+5. Do not use root for daily work; continue to use the management IAM user + MFA and assume roles.
 
 ## Post-Deployment: Daily MFA Workflow
 
@@ -330,4 +439,31 @@ After completing all phases, your daily workflow uses your existing admin user w
 - **State Management**: Each component (bootstrap, phase1, phase2, environments) has its own Terraform state
 - **Account Access**: Workload deployments use cross-account roles, not direct credentials
 - **Environment Promotion**: Deploy to dev first, then promote configurations to staging and production
+
+
+## Cost Controls and Teardown
+
+Keep costs predictable for workshops and personal sandboxes.
+
+- **Use Dev only for demos**: Skip staging/prod until needed.
+- **Small instances**: In `landing-zone/environments/*/terraform.tfvars`, set:
+  - `instance_type = "t3.micro"`
+  - `root_volume_size = 8` or `10`
+- **RHEL gold images**: If you have prepaid RHEL AMI IDs from your Red Hat portal, use them as needed.
+- **Short-lived environments**: Create during the workshop; destroy immediately after.
+- **Avoid expensive networking**: This repo does not create NAT Gateways or NLBs by default. Continue to avoid them for cost control.
+
+### Teardown after the session
+
+Run from the environment directory you deployed (e.g., `landing-zone/environments/dev`):
+
+```bash
+terraform destroy
+```
+
+This removes EC2, VPC, and related resources. Control Tower/org/root logging remain (low cost). For zero ongoing cost, you can keep the landing zone but destroy workloads as soon as you finish.
+
+### Optional: Budget and alerts
+
+Set an AWS Budget with email alerts to avoid surprises (Management account > Billing > Budgets). A simple monthly threshold (e.g., $10 or $20) is enough for workshops.
 

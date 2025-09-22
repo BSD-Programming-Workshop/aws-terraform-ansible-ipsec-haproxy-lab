@@ -53,18 +53,18 @@ output "unix_dev_account_id" {
 }
 
 output "unix_staging_account_id" {
-  description = "Unix Staging account ID"
-  value       = aws_organizations_account.unix_staging.id
+  description = "Unix Staging account ID (null if not created)"
+  value       = length(aws_organizations_account.unix_staging) > 0 ? aws_organizations_account.unix_staging[0].id : null
 }
 
 output "unix_prod_account_id" {
-  description = "Unix Prod account ID"
-  value       = aws_organizations_account.unix_prod.id
+  description = "Unix Prod account ID (null if not created)"
+  value       = length(aws_organizations_account.unix_prod) > 0 ? aws_organizations_account.unix_prod[0].id : null
 }
 
 output "network_account_id" {
-  description = "Network account ID"
-  value       = aws_organizations_account.network.id
+  description = "Network account ID (null if not created)"
+  value       = length(aws_organizations_account.network) > 0 ? aws_organizations_account.network[0].id : null
 }
 
 # Control Tower
@@ -79,11 +79,11 @@ output "account_mapping" {
   value = {
     management       = aws_organizations_organization.main.master_account_id
     log_archive      = aws_organizations_account.log_archive.id
-    audit           = aws_organizations_account.audit.id
+    audit            = aws_organizations_account.audit.id
     security_tooling = aws_organizations_account.security_tooling.id
-    unix_dev     = aws_organizations_account.unix_dev.id
-    unix_staging = aws_organizations_account.unix_staging.id
-    unix_prod    = aws_organizations_account.unix_prod.id
-    network         = aws_organizations_account.network.id
+    unix_dev         = aws_organizations_account.unix_dev.id
+    unix_staging     = length(aws_organizations_account.unix_staging) > 0 ? aws_organizations_account.unix_staging[0].id : null
+    unix_prod        = length(aws_organizations_account.unix_prod) > 0 ? aws_organizations_account.unix_prod[0].id : null
+    network          = length(aws_organizations_account.network) > 0 ? aws_organizations_account.network[0].id : null
   }
 }

@@ -39,6 +39,10 @@ variable "availability_zone" {
 variable "staging_account_id" {
   description = "AWS Account ID for staging environment"
   type        = string
+  validation {
+    condition     = can(regex("^\\d{12}$", var.staging_account_id))
+    error_message = "staging_account_id must be a 12-digit AWS account ID. Tip: run 'terraform output unix_staging_account_id' in landing-zone/phase1-foundation. If it is null, enable the Staging account in Phase 1 (see README 'Enable Staging/Prod/Network later')."
+  }
 }
 
 # Networking variables

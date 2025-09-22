@@ -60,6 +60,18 @@ resource "aws_iam_role" "cross_account_admin" {
   }
 }
 
+# Build cross-account role ARNs from non-null account IDs (handles deferred accounts)
+locals {
+  cross_account_ids = compact([
+    data.terraform_remote_state.foundation.outputs.unix_dev_account_id,
+    data.terraform_remote_state.foundation.outputs.unix_staging_account_id,
+    data.terraform_remote_state.foundation.outputs.unix_prod_account_id,
+    data.terraform_remote_state.foundation.outputs.network_account_id,
+    data.terraform_remote_state.foundation.outputs.security_tooling_account_id
+  ])
+  cross_account_role_arns = [for id in local.cross_account_ids : "arn:aws:iam::${id}:role/CrossAccountAdminRole"]
+}
+
 # Attach AdministratorAccess policy to cross-account role
 resource "aws_iam_role_policy_attachment" "cross_account_admin_policy" {
   provider   = aws.management
@@ -117,13 +129,7 @@ resource "aws_iam_policy" "enhanced_mfa_policy" {
         Action = [
           "sts:AssumeRole"
         ]
-        Resource = [
-          "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.freebsd_dev_account_id}:role/CrossAccountAdminRole",
-          "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.freebsd_staging_account_id}:role/CrossAccountAdminRole",
-          "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.freebsd_prod_account_id}:role/CrossAccountAdminRole",
-          "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.network_account_id}:role/CrossAccountAdminRole",
-          "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.security_tooling_account_id}:role/CrossAccountAdminRole"
-        ]
+        Resource = local.cross_account_role_arns
         Condition = {
           Bool = {
             "aws:MultiFactorAuthPresent" = "true"

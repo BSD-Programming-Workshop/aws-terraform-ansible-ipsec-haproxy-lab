@@ -10,6 +10,9 @@ resource "aws_s3_bucket" "terraform_state" {
     Environment = var.environment
     Project     = var.project_name
   }
+
+  # Allow terraform destroy to remove all object versions and delete markers
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "terraform_state" {
@@ -40,7 +43,7 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
 
 # DynamoDB table for state locking
 resource "aws_dynamodb_table" "terraform_locks" {
-  name           = "terraform-locks-${var.project_name}"
+  name           = "terraform-locks-${var.project_name}-${random_string.bucket_suffix.result}"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "LockID"
 

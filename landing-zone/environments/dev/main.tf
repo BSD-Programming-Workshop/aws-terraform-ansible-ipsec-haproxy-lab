@@ -27,7 +27,7 @@ provider "aws" {
   }
 }
 
-# Deploy FreeBSD workload
+# Deploy Unix workload (FreeBSD default)
 module "freebsd_workload" {
   source = "../../modules/unix-workload"
 

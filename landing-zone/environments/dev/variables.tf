@@ -34,6 +34,10 @@ variable "availability_zone" {
 variable "dev_account_id" {
   description = "AWS Account ID for development environment"
   type        = string
+  validation {
+    condition     = can(regex("^\\d{12}$", var.dev_account_id))
+    error_message = "dev_account_id must be a 12-digit AWS account ID. Tip: run 'terraform output unix_dev_account_id' in landing-zone/phase1-foundation to retrieve it."
+  }
 }
 
 # Networking variables
