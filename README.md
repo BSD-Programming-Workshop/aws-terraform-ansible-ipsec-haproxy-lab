@@ -452,8 +452,11 @@ Keep costs predictable for workshops and personal sandboxes.
 - **RHEL gold images**: If you have prepaid RHEL AMI IDs from your Red Hat portal, use them as needed.
 - **Short-lived environments**: Create during the workshop; destroy immediately after.
 - **Avoid expensive networking**: This repo does not create NAT Gateways or NLBs by default. Continue to avoid them for cost control.
+- **S3 lifecycle for state**: The bootstrap state bucket expires noncurrent versions after 30 days and aborts incomplete uploads after 7 days to limit storage costs.
 
 ### Teardown after the session
 
 Run from the environment directory you deployed (e.g., `landing-zone/environments/dev`):
 
+```bash
+terraform destroy
