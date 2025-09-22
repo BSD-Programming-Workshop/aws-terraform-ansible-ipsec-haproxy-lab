@@ -58,7 +58,8 @@ resource "aws_organizations_organization" "main" {
 
 # Security OU
 resource "aws_organizations_organizational_unit" "security" {
-  name      = "Security"
+  # If you created CT via console, set var.security_ou_name to match the wizard's OU name (e.g., "Security-Foundation")
+  name      = var.security_ou_name
   parent_id = aws_organizations_organization.main.roots[0].id
 
   tags = {
@@ -104,7 +105,7 @@ resource "aws_controltower_landing_zone" "main" {
     governedRegions = var.governed_regions
     organizationStructure = {
       security = {
-        name = aws_organizations_organizational_unit.security.name
+        name = var.security_ou_name
       }
     }
     centralizedLogging = {
@@ -126,7 +127,7 @@ resource "aws_controltower_landing_zone" "main" {
       accountId = aws_organizations_account.audit.id
     }
     accessManagement = {
-      enabled = true
+      enabled = var.access_management_enabled
     }
   })
 

@@ -24,6 +24,18 @@ variable "enable_control_tower" {
   default     = false
 }
 
+variable "security_ou_name" {
+  description = "Name for the Security (foundational) OU. Set to the exact name created by the CT wizard (e.g., 'Security-Foundation')."
+  type        = string
+  default     = "Security"
+}
+
+variable "access_management_enabled" {
+  description = "Whether CT Access Management (IAM Identity Center) should be enabled in the landing zone manifest."
+  type        = bool
+  default     = false
+}
+
 variable "log_retention_days" {
   description = "Number of days to retain CloudTrail logs"
   type        = number
