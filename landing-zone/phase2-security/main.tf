@@ -21,6 +21,16 @@ locals {
   backend_bucket_tmp3 = trimspace(local.backend_bucket_tmp2)
   backend_bucket      = replace(replace(local.backend_bucket_tmp3, "\"", ""), "\"", "")
   effective_bucket    = var.terraform_state_bucket != "" ? var.terraform_state_bucket : local.backend_bucket
+
+  # Try to read the Phase 1 backend.hcl to get the exact key
+  p1_backend_path     = "${path.module}/../phase1-foundation/backend.hcl"
+  p1_backend_hcl      = can(file(local.p1_backend_path)) ? file(local.p1_backend_path) : ""
+  p1_key_line         = can(regex("key\\s*=\\s*\"[^\"]+\"", local.p1_backend_hcl)) ? regex("key\\s*=\\s*\"[^\"]+\"", local.p1_backend_hcl) : ""
+  p1_key_tmp1         = replace(local.p1_key_line, "key", "")
+  p1_key_tmp2         = replace(local.p1_key_tmp1, "=", "")
+  p1_key_tmp3         = trimspace(local.p1_key_tmp2)
+  p1_key              = replace(replace(local.p1_key_tmp3, "\"", ""), "\"", "")
+  effective_p1_key    = length(local.p1_key) > 0 ? local.p1_key : "phase1-foundation/terraform.tfstate"
 }
 
 # Data source to get organization information
@@ -28,7 +38,7 @@ data "terraform_remote_state" "foundation" {
   backend = "s3"
   config = {
     bucket = local.effective_bucket
-    key    = "landing-zone/phase1-foundation/terraform.tfstate"
+    key    = local.effective_p1_key
     region = var.home_region
   }
 }
