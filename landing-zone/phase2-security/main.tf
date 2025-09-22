@@ -49,6 +49,17 @@ provider "aws" {
   region = var.home_region
 }
 
+# Assume into Unix Dev account using the default Organizations admin role
+# This bootstraps CrossAccountAdminRole in the member account
+provider "aws" {
+  alias  = "unix_dev"
+  region = var.home_region
+  assume_role {
+    role_arn     = "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.unix_dev_account_id}:role/OrganizationAccountAccessRole"
+    session_name = "phase2-bootstrap-unix-dev"
+  }
+}
+
 # Cross-account role for workload account access
 resource "aws_iam_role" "cross_account_admin" {
   provider = aws.management
@@ -98,6 +109,46 @@ locals {
 resource "aws_iam_role_policy_attachment" "cross_account_admin_policy" {
   provider   = aws.management
   role       = aws_iam_role.cross_account_admin.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+# Create CrossAccountAdminRole inside Unix Dev so management users with MFA can assume it
+resource "aws_iam_role" "unix_dev_cross_account_admin" {
+  provider = aws.unix_dev
+  name     = "CrossAccountAdminRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowMFAFromManagement",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.terraform_remote_state.foundation.outputs.management_account_id}:root"
+        },
+        Action = "sts:AssumeRole",
+        Condition = {
+          Bool = {
+            "aws:MultiFactorAuthPresent" = "true"
+          },
+          NumericLessThan = {
+            "aws:MultiFactorAuthAge" = "3600"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "Cross Account Admin Role"
+    Environment = "dev"
+    Purpose     = "cross-account-access"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "unix_dev_cross_account_admin_policy" {
+  provider   = aws.unix_dev
+  role       = aws_iam_role.unix_dev_cross_account_admin.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
