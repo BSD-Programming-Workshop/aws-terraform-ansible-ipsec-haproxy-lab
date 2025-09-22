@@ -26,9 +26,9 @@ provider "aws" {
 
 # Create AWS Organization
 resource "aws_organizations_organization" "main" {
+  # Do NOT include config.amazonaws.com here; Control Tower will enable org-level AWS Config during setup.
   aws_service_access_principals = [
     "cloudtrail.amazonaws.com",
-    "config.amazonaws.com",
     "controltower.amazonaws.com",
     "guardduty.amazonaws.com",
     "securityhub.amazonaws.com",
