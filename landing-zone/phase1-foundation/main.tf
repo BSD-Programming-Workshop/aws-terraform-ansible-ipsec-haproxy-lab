@@ -80,6 +80,11 @@ resource "aws_organizations_organizational_unit" "shared_services" {
   }
 }
 
+# Ensure Control Tower Service-Linked Role exists (required for landing zone creation)
+resource "aws_iam_service_linked_role" "control_tower" {
+  aws_service_name = "controltower.amazonaws.com"
+}
+
 # Control Tower Landing Zone
 resource "aws_controltower_landing_zone" "main" {
   manifest_json = jsonencode({
