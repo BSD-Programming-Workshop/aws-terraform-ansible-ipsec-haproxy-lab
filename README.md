@@ -129,6 +129,7 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
    # Note the S3 bucket name from outputs
    cd ..
    ```
+   This step also generates backend.hcl files for Phase 1, Phase 2, and the Dev environment with the correct S3 backend settings.
 
 ### Phase 1: Deploy Landing Zone Foundation
 
@@ -148,11 +149,7 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
    ```bash
    export AWS_PROFILE=bootstrap
    export AWS_DEFAULT_REGION=us-east-1
-   terraform init \
-     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
-     -backend-config="key=phase1-foundation/terraform.tfstate" \
-     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
-     -backend-config="encrypt=true"
+   terraform init -backend-config=backend.hcl
    terraform apply
    # Note the account IDs from outputs - you'll need these for Phase 2
    ```
@@ -168,14 +165,10 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
 
    2) Add their emails to `landing-zone/phase1-foundation/terraform.tfvars`.
 
-   3) Re-apply Phase 1 from `landing-zone/phase1-foundation/` with the same backend settings:
+   3) Re-apply Phase 1 from `landing-zone/phase1-foundation/`:
 
    ```bash
-   terraform init \
-     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
-     -backend-config="key=phase1-foundation/terraform.tfstate" \
-     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
-     -backend-config="encrypt=true"
+   terraform init -backend-config=backend.hcl
    terraform apply
    ```
 
@@ -185,12 +178,7 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
    ```bash
    cd ../phase2-security
    export AWS_PROFILE=bootstrap
-   terraform init \
-     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
-     -backend-config="key=phase2-security/terraform.tfstate" \
-     -backend-config="region=us-east-1" \
-     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
-     -backend-config="encrypt=true"
+   terraform init -backend-config=backend.hcl
    terraform apply
    # This creates: LandingZoneAdministrators group, MFA policies, cross-account roles
    ```
@@ -239,13 +227,13 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
 
 ### Phase 3: Deploy Workloads to Isolated Accounts
 
-**Note**: After Control Tower deployment, you use cross-account roles instead of direct credentials. Network and DNS accounts are created but not used in the current implementation. Each workload creates its own VPC for maximum isolation.
+**Note**: After Control Tower deployment, you use cross-account roles instead of direct credentials. The Network account is not used in the current implementation. Each workload creates its own VPC for maximum isolation.
 
-Choose your target environment (dev/staging/prod):
+For this tutorial, deploy Dev only. Staging/Prod are optional and require enabling those accounts in Phase 1 first (see "Enable Staging/Prod/Network later").
 
 1. **Configure environment variables**:
    ```bash
-   cd ../environments/dev  # or staging/prod
+   cd landing-zone/environments/dev
    cp terraform.tfvars.example terraform.tfvars
    # Edit terraform.tfvars with:
    # - Account ID from phase1 outputs
@@ -257,15 +245,26 @@ Choose your target environment (dev/staging/prod):
 2. **Deploy workload infrastructure** (uses cross-account role to target account):
    ```bash
    # Use default profile with MFA session tokens
-   terraform init \
-     -backend-config="bucket=YOUR-TERRAFORM-STATE-BUCKET" \
-     -backend-config="key=environments/dev/terraform.tfstate" \
-     -backend-config="region=us-east-1" \
-     -backend-config="dynamodb_table=YOUR-DYNAMODB-TABLE" \
-     -backend-config="encrypt=true"
+   terraform init -backend-config=backend.hcl
    terraform apply
    # Deploys FreeBSD instance by default
    # If rhel_ami_id is set, also deploys RHEL instance in same VPC
+   ```
+
+3. **(Optional) Staging environment** — only if enabled in Phase 1
+   ```bash
+   cd ../../environments/staging
+   terraform init -backend-config=backend.hcl
+   # Update terraform.tfvars with staging_account_id and your keys/IP
+   terraform apply
+   ```
+
+4. **(Optional) Production environment** — only if enabled in Phase 1
+   ```bash
+   cd ../prod
+   terraform init -backend-config=backend.hcl
+   # Update terraform.tfvars with prod_account_id and your keys/IP
+   terraform apply
    ```
 
 3. **Configure with Ansible**:
@@ -473,6 +472,7 @@ After completing all phases, your daily workflow uses your existing admin user w
    ```bash
    # Terraform automatically assumes cross-account roles
    cd landing-zone/environments/dev
+   terraform init -backend-config=backend.hcl
    terraform plan  # Works across accounts via LandingZoneAdministrators group permissions
    ```
 
