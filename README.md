@@ -391,7 +391,50 @@ terraform output unix_staging_account_id
 terraform output unix_prod_account_id
 ```
 
-## Optional: Root User Hardening (Post-Lab)
+## Cost Controls and Teardown
+
+Keep costs predictable for workshops and personal sandboxes.
+
+- **Use Dev only for demos**: Skip staging/prod until needed.
+- **Small instances**: In `landing-zone/environments/*/terraform.tfvars`, set:
+  - `instance_type = "t3.micro"`
+  - `root_volume_size = 8` or `10`
+- **RHEL gold images**: If you have prepaid RHEL AMI IDs from your Red Hat portal, use them as needed.
+- **Short-lived environments**: Create during the workshop; destroy immediately after.
+- **Avoid expensive networking**: This repo does not create NAT Gateways or NLBs by default. Continue to avoid them for cost control.
+- **S3 lifecycle for state**: The bootstrap state bucket expires noncurrent versions after 30 days and aborts incomplete uploads after 7 days to limit storage costs.
+
+### Control Tower log lifecycle (optional)
+
+After Phase 1, you can transition Control Tower log bucket objects to Glacier after 7 days. Do this from a shell after switching role into the Log Archive account.
+
+```bash
+export BUCKET="aws-controltower-logs-ACCOUNT_ID-us-east-1"  # Replace with your actual bucket name
+
+cat > lifecycle.json <<'JSON'
+{
+  "Rules": [
+    {
+      "ID": "transition-to-glacier-7d",
+      "Status": "Enabled",
+      "Filter": {},
+      "Transitions": [
+        { "Days": 7, "StorageClass": "GLACIER" }
+      ]
+    }
+  ]
+}
+JSON
+
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket "$BUCKET" \
+  --lifecycle-configuration file://lifecycle.json
+
+# Verify
+aws s3api get-bucket-lifecycle-configuration --bucket "$BUCKET"
+```
+
+### Optional: Root User Hardening (Post-Lab)
 
 Each AWS account has a root user tied to its unique email address. Root is not used in normal operations, but should be hardened after the lab:
 
