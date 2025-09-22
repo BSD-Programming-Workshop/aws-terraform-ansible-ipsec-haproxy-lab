@@ -112,14 +112,10 @@ resource "aws_controltower_landing_zone" "main" {
       accountId = aws_organizations_account.log_archive.id
       configurations = {
         loggingBucket = {
-          retentionConfiguration = {
-            retentionPeriod = var.log_retention_days
-          }
+          retentionDays = var.log_retention_days
         }
         accessLoggingBucket = {
-          retentionConfiguration = {
-            retentionPeriod = var.access_log_retention_days
-          }
+          retentionDays = var.access_log_retention_days
         }
       }
     }
