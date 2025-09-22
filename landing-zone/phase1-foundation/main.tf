@@ -27,9 +27,10 @@ provider "aws" {
 # Create AWS Organization
 resource "aws_organizations_organization" "main" {
   # Do NOT include config.amazonaws.com here; Control Tower will enable org-level AWS Config during setup.
+  # If you are setting up Control Tower via the console and importing into Terraform, also keep
+  # controltower.amazonaws.com disabled here to avoid conflicting state during setup.
   aws_service_access_principals = [
     "cloudtrail.amazonaws.com",
-    "controltower.amazonaws.com",
     "guardduty.amazonaws.com",
     "securityhub.amazonaws.com",
     "sso.amazonaws.com",
@@ -87,6 +88,7 @@ resource "aws_iam_service_linked_role" "control_tower" {
 
 # Control Tower Landing Zone
 resource "aws_controltower_landing_zone" "main" {
+  count = var.enable_control_tower ? 1 : 0
   manifest_json = jsonencode({
     governedRegions = var.governed_regions
     organizationStructure = {

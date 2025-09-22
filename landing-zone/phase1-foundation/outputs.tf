@@ -69,8 +69,8 @@ output "network_account_id" {
 
 # Control Tower
 output "control_tower_landing_zone_arn" {
-  description = "Control Tower Landing Zone ARN"
-  value       = aws_controltower_landing_zone.main.arn
+  description = "Control Tower Landing Zone ARN (null if created via console)"
+  value       = var.enable_control_tower && length(aws_controltower_landing_zone.main) > 0 ? aws_controltower_landing_zone.main[0].arn : null
 }
 
 # Account mapping for cross-account access

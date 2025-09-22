@@ -18,6 +18,12 @@ variable "governed_regions" {
   default     = ["us-east-1"]
 }
 
+variable "enable_control_tower" {
+  description = "If true, Terraform will create the Control Tower landing zone. If false, set up via console and import later."
+  type        = bool
+  default     = false
+}
+
 variable "log_retention_days" {
   description = "Number of days to retain CloudTrail logs"
   type        = number
