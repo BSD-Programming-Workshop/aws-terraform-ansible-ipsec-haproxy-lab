@@ -1,15 +1,6 @@
 # Bootstrap resources for Terraform backend
 # Run this first to create S3 bucket and DynamoDB table
 
-terraform {
-  required_providers {
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.4"
-    }
-  }
-}
-
 # S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "terraform-state-${var.project_name}-${random_string.bucket_suffix.result}"
