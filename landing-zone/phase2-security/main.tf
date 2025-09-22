@@ -86,9 +86,9 @@ resource "aws_iam_role" "cross_account_admin" {
 locals {
   cross_account_ids = compact([
     data.terraform_remote_state.foundation.outputs.unix_dev_account_id,
-    data.terraform_remote_state.foundation.outputs.unix_staging_account_id,
-    data.terraform_remote_state.foundation.outputs.unix_prod_account_id,
-    data.terraform_remote_state.foundation.outputs.network_account_id,
+    try(data.terraform_remote_state.foundation.outputs.unix_staging_account_id, null),
+    try(data.terraform_remote_state.foundation.outputs.unix_prod_account_id, null),
+    try(data.terraform_remote_state.foundation.outputs.network_account_id, null),
     data.terraform_remote_state.foundation.outputs.security_tooling_account_id
   ])
   cross_account_role_arns = [for id in local.cross_account_ids : "arn:aws:iam::${id}:role/CrossAccountAdminRole"]
