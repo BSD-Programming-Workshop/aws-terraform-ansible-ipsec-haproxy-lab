@@ -1,6 +1,15 @@
 # Bootstrap resources for Terraform backend
 # Run this first to create S3 bucket and DynamoDB table
 
+terraform {
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4"
+    }
+  }
+}
+
 # S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "terraform-state-${var.project_name}-${random_string.bucket_suffix.result}"
@@ -90,4 +99,24 @@ resource "random_string" "bucket_suffix" {
   length  = 8
   special = false
   upper   = false
+}
+
+# Discover current AWS region for backend.hcl
+data "aws_region" "current" {}
+
+# Write a backend.hcl for Phase 1 with the correct settings
+resource "local_file" "phase1_backend_hcl" {
+  filename = "${path.module}/../landing-zone/phase1-foundation/backend.hcl"
+  content  = <<-HCL
+    bucket         = "${aws_s3_bucket.terraform_state.id}"
+    key            = "phase1-foundation/terraform.tfstate"
+    region         = "${data.aws_region.current.name}"
+    dynamodb_table = "${aws_dynamodb_table.terraform_locks.name}"
+    encrypt        = true
+  HCL
+
+  depends_on = [
+    aws_s3_bucket.terraform_state,
+    aws_dynamodb_table.terraform_locks
+  ]
 }
