@@ -223,8 +223,8 @@ resource "aws_organizations_policy" "enforce_mfa_scp" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "DenyActionsWithoutMFA"
-        Effect = "Deny"
+        Sid       = "DenyActionsWithoutMFA"
+        Effect    = "Deny"
         NotAction = [
           "iam:CreateVirtualMFADevice",
           "iam:EnableMFADevice",
@@ -244,7 +244,6 @@ resource "aws_organizations_policy" "enforce_mfa_scp" {
             "aws:MultiFactorAuthPresent" = "false"
           }
         }
-        Principal = "*"
       }
     ]
   })
