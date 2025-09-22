@@ -80,45 +80,8 @@ resource "aws_organizations_organizational_unit" "shared_services" {
   }
 }
 
-# IAM Role for Control Tower
-resource "aws_iam_role" "control_tower_admin" {
-  name = "AWSControlTowerAdmin"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "controltower.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  max_session_duration = 43200
-
-  tags = {
-    Name        = "Control Tower Admin Role"
-    Environment = "management"
-    Purpose     = "control-tower-service"
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "control_tower_admin_service" {
-  role       = aws_iam_role.control_tower_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSControlTowerServiceRolePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "control_tower_admin_full" {
-  role       = aws_iam_role.control_tower_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
-
 # Control Tower Landing Zone
 resource "aws_controltower_landing_zone" "main" {
-  depends_on = [aws_iam_role.control_tower_admin]
   manifest_json = jsonencode({
     governedRegions = var.governed_regions
     organizationStructure = {
