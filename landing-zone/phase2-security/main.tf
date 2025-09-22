@@ -15,8 +15,11 @@ terraform {
 locals {
   backend_hcl         = file("${path.module}/backend.hcl")
   backend_bucket_line = can(regex("bucket\\s*=\\s*\"[^\"]+\"", local.backend_hcl)) ? regex("bucket\\s*=\\s*\"[^\"]+\"", local.backend_hcl) : ""
-  backend_bucket_val1 = length(local.backend_bucket_line) > 0 ? regexreplace(local.backend_bucket_line, "bucket\\s*=\\s*\"", "") : ""
-  backend_bucket      = length(local.backend_bucket_val1) > 0 ? regexreplace(local.backend_bucket_val1, "\"$", "") : ""
+  # Strip prefix/suffix without regexreplace (use replace/trimspace)
+  backend_bucket_tmp1 = replace(local.backend_bucket_line, "bucket", "")
+  backend_bucket_tmp2 = replace(local.backend_bucket_tmp1, "=", "")
+  backend_bucket_tmp3 = trimspace(local.backend_bucket_tmp2)
+  backend_bucket      = replace(replace(local.backend_bucket_tmp3, "\"", ""), "\"", "")
   effective_bucket    = var.terraform_state_bucket != "" ? var.terraform_state_bucket : local.backend_bucket
 }
 
@@ -190,12 +193,6 @@ resource "aws_iam_group" "landing_zone_admins" {
   provider = aws.management
   name     = "LandingZoneAdministrators"
   path     = "/"
-
-  tags = {
-    Name        = "Landing Zone Administrators"
-    Environment = "management"
-    Purpose     = "landing-zone-management"
-  }
 }
 
 # Attach enhanced MFA policy to administrators group
