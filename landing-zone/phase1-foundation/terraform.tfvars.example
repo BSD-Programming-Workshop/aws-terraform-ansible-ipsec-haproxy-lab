@@ -11,25 +11,30 @@ log_retention_days        = 365
 access_log_retention_days = 90
   
 # Account Email Addresses (MUST be unique across all AWS)
-# You need 7 unique email addresses total for all accounts
+# Tutorial scope (cost-controlled): provide 4 emails now for these accounts:
+#   - Log Archive, Audit, Security Tooling, Unix Dev
+# If you later enable Staging, Prod, and Network, add 3 more unique emails (total 7).
 # 
-# Proton Pass Aliases (Recommended):
-# Create aliases in Proton Pass that forward to your main Proton email
+# Proton Pass Aliases (Recommended): create aliases that forward to your inbox
 # aws-log-archive@[your-alias-domain]
 # aws-audit@[your-alias-domain]
 # aws-security@[your-alias-domain]
 # aws-dev@[your-alias-domain]
-# aws-staging@[your-alias-domain]
-# aws-prod@[your-alias-domain]
-# aws-network@[your-alias-domain]
+# aws-staging@[your-alias-domain]   # only if enabling later
+# aws-prod@[your-alias-domain]      # only if enabling later
+# aws-network@[your-alias-domain]   # only if enabling later
 
-log_archive_email      = "aws-log-archive@your-alias-domain.com"
-audit_email           = "aws-audit@your-alias-domain.com"
-security_tooling_email = "aws-security@your-alias-domain.com"
-unix_dev_email     = "aws-dev@your-alias-domain.com"
-unix_staging_email = "aws-staging@your-alias-domain.com"
-unix_prod_email    = "aws-prod@your-alias-domain.com"
-network_email         = "aws-network@your-alias-domain.com"
+log_archive_email       = "aws-log-archive@your-alias-domain.com"  # REQUIRED for tutorial
+audit_email             = "aws-audit@your-alias-domain.com"         # REQUIRED for tutorial
+security_tooling_email  = "aws-security@your-alias-domain.com"      # REQUIRED for tutorial
+unix_dev_email          = "aws-dev@your-alias-domain.com"           # REQUIRED for tutorial
+
+# Deferred accounts (leave empty for this tutorial). When you want to enable later,
+# provide unique emails here AND remove `count = 0` for the corresponding resources
+# in `main.tf` as explained in the README (Phase 1 section: Enable Staging/Prod/Network later).
+unix_staging_email = ""  # OPTIONAL now; set when enabling Staging later
+unix_prod_email    = ""  # OPTIONAL now; set when enabling Prod later
+network_email      = ""  # OPTIONAL now; set when enabling Network later
 
 # Budget alerts (required for cost controls section)
 budget_email  = "you@example.com"  # Recipient of budget alerts
