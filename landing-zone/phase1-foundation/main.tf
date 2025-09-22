@@ -26,16 +26,27 @@ provider "aws" {
 
 # Create AWS Organization
 resource "aws_organizations_organization" "main" {
-  # Do NOT include config.amazonaws.com here; Control Tower will enable org-level AWS Config during setup.
-  # If you are setting up Control Tower via the console and importing into Terraform, also keep
-  # controltower.amazonaws.com disabled here to avoid conflicting state during setup.
-  aws_service_access_principals = [
-    "cloudtrail.amazonaws.com",
-    "guardduty.amazonaws.com",
-    "securityhub.amazonaws.com",
-    "sso.amazonaws.com",
-    "account.amazonaws.com"
-  ]
+  # Manage trusted access principals conditionally.
+  # - When enable_control_tower = false (console setup/import path): keep CT/Config principals out to avoid conflicts
+  # - When enable_control_tower = true  (Terraform-managed CT): include CT/Config/StackSets principals to prevent drift
+
+  locals {
+    base_principals = [
+      "cloudtrail.amazonaws.com",
+      "guardduty.amazonaws.com",
+      "securityhub.amazonaws.com",
+      "sso.amazonaws.com",
+      "account.amazonaws.com"
+    ]
+    ct_principals = [
+      "controltower.amazonaws.com",
+      "config.amazonaws.com",
+      "member.org.stacksets.cloudformation.amazonaws.com"
+    ]
+    computed_principals = var.enable_control_tower ? concat(local.base_principals, local.ct_principals) : local.base_principals
+  }
+
+  aws_service_access_principals = local.computed_principals
 
   feature_set = "ALL"
 
