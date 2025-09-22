@@ -121,6 +121,40 @@ resource "local_file" "phase1_backend_hcl" {
   ]
 }
 
+# Staging environment backend.hcl
+resource "local_file" "env_staging_backend_hcl" {
+  filename = "${path.module}/../landing-zone/environments/staging/backend.hcl"
+  content  = <<-HCL
+    bucket         = "${aws_s3_bucket.terraform_state.id}"
+    key            = "environments/staging/terraform.tfstate"
+    region         = "${data.aws_region.current.name}"
+    dynamodb_table = "${aws_dynamodb_table.terraform_locks.name}"
+    encrypt        = true
+  HCL
+
+  depends_on = [
+    aws_s3_bucket.terraform_state,
+    aws_dynamodb_table.terraform_locks
+  ]
+}
+
+# Prod environment backend.hcl
+resource "local_file" "env_prod_backend_hcl" {
+  filename = "${path.module}/../landing-zone/environments/prod/backend.hcl"
+  content  = <<-HCL
+    bucket         = "${aws_s3_bucket.terraform_state.id}"
+    key            = "environments/prod/terraform.tfstate"
+    region         = "${data.aws_region.current.name}"
+    dynamodb_table = "${aws_dynamodb_table.terraform_locks.name}"
+    encrypt        = true
+  HCL
+
+  depends_on = [
+    aws_s3_bucket.terraform_state,
+    aws_dynamodb_table.terraform_locks
+  ]
+}
+
 # Phase 2 backend.hcl
 resource "local_file" "phase2_backend_hcl" {
   filename = "${path.module}/../landing-zone/phase2-security/backend.hcl"
