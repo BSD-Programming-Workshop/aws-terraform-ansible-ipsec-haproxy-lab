@@ -9,7 +9,7 @@ governed_regions = ["us-east-1"]
 # Logging Configuration
 log_retention_days        = 365
 access_log_retention_days = 90
-
+  
 # Account Email Addresses (MUST be unique across all AWS)
 # You need 7 unique email addresses total for all accounts
 # 
@@ -30,3 +30,7 @@ unix_dev_email     = "aws-dev@your-alias-domain.com"
 unix_staging_email = "aws-staging@your-alias-domain.com"
 unix_prod_email    = "aws-prod@your-alias-domain.com"
 network_email         = "aws-network@your-alias-domain.com"
+
+# Budget alerts (required for cost controls section)
+budget_email  = "you@example.com"  # Recipient of budget alerts
+budget_amount = 20                  # USD per month threshold

@@ -457,13 +457,3 @@ Keep costs predictable for workshops and personal sandboxes.
 
 Run from the environment directory you deployed (e.g., `landing-zone/environments/dev`):
 
-```bash
-terraform destroy
-```
-
-This removes EC2, VPC, and related resources. Control Tower/org/root logging remain (low cost). For zero ongoing cost, you can keep the landing zone but destroy workloads as soon as you finish.
-
-### Optional: Budget and alerts
-
-Set an AWS Budget with email alerts to avoid surprises (Management account > Billing > Budgets). A simple monthly threshold (e.g., $10 or $20) is enough for workshops.
-

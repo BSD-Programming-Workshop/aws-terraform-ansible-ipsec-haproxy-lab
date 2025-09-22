@@ -72,3 +72,15 @@ variable "network_email" {
   type        = string
   # Example: "aws-network@yourdomain.com"
 }
+
+# AWS Budget configuration (for cost alerts)
+variable "budget_email" {
+  description = "Email address to receive AWS Budget alerts"
+  type        = string
+}
+
+variable "budget_amount" {
+  description = "Monthly cost threshold in USD for the budget alert"
+  type        = number
+  default     = 20
+}
