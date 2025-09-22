@@ -11,11 +11,20 @@ terraform {
   required_version = ">= 1.0"
 }
 
+# Auto-detect Phase 1 state bucket from backend.hcl if not provided via variable
+locals {
+  backend_hcl         = file("${path.module}/backend.hcl")
+  backend_bucket_line = can(regex("bucket\\s*=\\s*\"[^\"]+\"", local.backend_hcl)) ? regex("bucket\\s*=\\s*\"[^\"]+\"", local.backend_hcl) : ""
+  backend_bucket_val1 = length(local.backend_bucket_line) > 0 ? regexreplace(local.backend_bucket_line, "bucket\\s*=\\s*\"", "") : ""
+  backend_bucket      = length(local.backend_bucket_val1) > 0 ? regexreplace(local.backend_bucket_val1, "\"$", "") : ""
+  effective_bucket    = var.terraform_state_bucket != "" ? var.terraform_state_bucket : local.backend_bucket
+}
+
 # Data source to get organization information
 data "terraform_remote_state" "foundation" {
   backend = "s3"
   config = {
-    bucket = var.terraform_state_bucket
+    bucket = local.effective_bucket
     key    = "landing-zone/phase1-foundation/terraform.tfstate"
     region = var.home_region
   }

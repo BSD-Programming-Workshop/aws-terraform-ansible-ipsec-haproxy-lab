@@ -151,6 +151,7 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
    export AWS_DEFAULT_REGION=us-east-1
    terraform init -backend-config=backend.hcl
    terraform apply
+   # If Control Tower throws “could not assume role,” wait 1–2 minutes for IAM propagation and re-apply
    # Note the account IDs from outputs - you'll need these for Phase 2
    ```
 
@@ -172,16 +173,111 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
    terraform apply
    ```
 
+#### Control Tower setup: choose Terraform or Console + Import
+
+You can create Control Tower (CT) in one of two ways. For workshops, we recommend the Console + Import path to avoid eventual-consistency hiccups.
+
+- Option A — Terraform creates CT (advanced)
+  - In `landing-zone/phase1-foundation/terraform.tfvars`, set:
+    ```hcl
+    enable_control_tower = true
+    ```
+  - Ensure the org is clean (no org-level AWS Config/CloudTrail, and do not pre-create `AWSControlTowerAdmin`).
+  - Run from `landing-zone/phase1-foundation/`:
+    ```bash
+    terraform init -backend-config=backend.hcl
+    terraform apply
+    ```
+  - If CT fails with an assume-role error, use Option B.
+
+- Option B — Create CT in Console, then import into Terraform (recommended)
+  1) Ensure org-level AWS Config is not enabled and trusted access for CT/Config will not be auto-enabled by Terraform. Our Phase 1 keeps `config.amazonaws.com` and `controltower.amazonaws.com` out of `aws_service_access_principals`.
+  2) In the console (us-east-1), open Control Tower and run the landing zone setup wizard. Use the Phase 1-created accounts for Log Archive and Audit if prompted.
+       - Important: Deselect "Set up AWS IAM Identity Center" in the wizard. We configure access in Phase 2; leaving Identity Center off avoids extra setup and cost during the workshop.
+  3) After CT completes, fetch the Landing Zone ARN:
+     ```bash
+     aws controltower list-landing-zones --region us-east-1 --profile bootstrap
+     ```
+  4) Enable Terraform management in `landing-zone/phase1-foundation/terraform.tfvars`:
+     ```hcl
+     enable_control_tower = true
+     ```
+  5) Import and reconcile from `landing-zone/phase1-foundation/`:
+     ```bash
+     terraform init -backend-config=backend.hcl
+     terraform import 'aws_controltower_landing_zone.main[0]' LZ_ARN_FROM_STEP_3
+     terraform plan
+     terraform apply
+     ```
+
+Notes:
+- Do not pre-create `AWSControlTowerAdmin`; Control Tower creates/manages it.
+- Leave org-level AWS Config disabled before setup; Control Tower enables and configures it during the wizard.
+
+##### Console OU Import and Alignment (exact steps)
+
+If the Control Tower wizard created a foundational OU (e.g., `Security-Foundation`), follow these steps so Terraform adopts it without renaming or moving accounts unexpectedly.
+
+1) Set variables in `landing-zone/phase1-foundation/terraform.tfvars` (adjust names/retention as needed):
+
+```hcl
+enable_control_tower       = true
+security_ou_name           = "Security-Foundation"   # Match the wizard exactly
+access_management_enabled  = false                    # Leave IAM Identity Center off for the workshop
+
+# Either keep wizard retention (e.g., 7/7) or adopt TF defaults (60/30)
+log_retention_days         = 60
+access_log_retention_days  = 30
+```
+
+2) Remove the old Security OU from Terraform state (does not delete it in AWS):
+
+```bash
+cd landing-zone/phase1-foundation
+terraform state rm aws_organizations_organizational_unit.security
+```
+
+3) Find the OU ID of the console-created Security OU and import it:
+
+```bash
+# Get ROOT ID
+ROOT_ID=$(aws organizations list-roots --query 'Roots[0].Id' --output text --profile bootstrap)
+
+# List OUs and copy the Id for the row where Name matches your wizard OU (e.g., Security-Foundation)
+aws organizations list-organizational-units-for-parent \
+  --parent-id "$ROOT_ID" \
+  --query 'OrganizationalUnits[].[Name,Id]' \
+  --output table \
+  --profile bootstrap
+
+# Import the OU to Terraform
+terraform import aws_organizations_organizational_unit.security ou-REPLACE_WITH_ID
+```
+
+4) Reconcile and apply:
+
+```bash
+terraform plan
+terraform apply
+```
+
+Tips:
+- If the plan proposes moving the `Security Tooling` account, that's expected when aligning to the CT OU. If you prefer it in a different OU, adjust its `parent_id` in Terraform accordingly.
+- If you want to keep the wizard's shorter S3 log retention (e.g., 7 days), set `log_retention_days` and `access_log_retention_days` to 7 before apply.
+
 ### Phase 2: Deploy Security Configuration
 
 1. **Deploy cross-account roles and MFA policies**:
    ```bash
    cd ../phase2-security
    export AWS_PROFILE=bootstrap
+   export AWS_DEFAULT_REGION=us-east-1
    terraform init -backend-config=backend.hcl
    terraform apply
    # This creates: LandingZoneAdministrators group, MFA policies, cross-account roles
    ```
+
+   Note: Phase 2 automatically reads the Phase 1 state bucket from `landing-zone/phase2-security/backend.hcl`. You only need to set `terraform_state_bucket` in `terraform.tfvars` if you want to override auto-detection.
 
 2. **Add your existing admin user to the Landing Zone group**:
    ```bash

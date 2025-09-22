@@ -9,7 +9,8 @@ variable "home_region" {
 variable "terraform_state_bucket" {
   description = "S3 bucket for Terraform state storage"
   type        = string
-  # This will be created in the bootstrap phase
+  # Optional: If unset, Phase 2 will auto-read bucket from backend.hcl in this directory
+  default     = ""
 }
 
 variable "organization_name" {
