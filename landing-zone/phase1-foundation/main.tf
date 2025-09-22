@@ -177,7 +177,9 @@ resource "aws_organizations_account" "security_tooling" {
   name                       = "Security Tooling"
   email                      = var.security_tooling_email
   # iam_user_access_to_billing = "DENY"
-  parent_id                  = aws_organizations_organizational_unit.security.id
+  # Place Security Tooling outside of the Security OU so Control Tower can update successfully
+  # Control Tower expects only shared accounts (Log Archive, Audit) in the Security OU.
+  parent_id                  = aws_organizations_organizational_unit.shared_services.id
 
   tags = {
     Name        = "Security Tooling Account"
