@@ -91,14 +91,13 @@ resource "aws_iam_role" "control_tower_admin" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = [
-            "controltower.amazonaws.com",
-            "cloudformation.amazonaws.com"
-          ]
+          Service = "controltower.amazonaws.com"
         }
       }
     ]
   })
+
+  max_session_duration = 43200
 
   tags = {
     Name        = "Control Tower Admin Role"
