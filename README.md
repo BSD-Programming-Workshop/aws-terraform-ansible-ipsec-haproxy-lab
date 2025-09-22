@@ -27,8 +27,7 @@ Root Organization (Management Account)
 │   ├── Unix Staging Account (with dedicated VPC)
 │   └── Unix Prod Account (with dedicated VPC)
 └── Shared Services OU
-    ├── Network Account (reserved for future use)
-    └── DNS Account (reserved for future use)
+    └── Network Account (reserved for future use)
 ```
 
 ## Networking Architecture
@@ -38,7 +37,7 @@ Root Organization (Management Account)
 - **Staging Environment**: 10.2.0.0/16 VPC in Staging Account  
 - **Production Environment**: 10.3.0.0/16 VPC in Production Account
 
-**Future Enhancement**: The Network Account is provisioned but not currently used. It's reserved for potential centralized networking services like:
+**Future Enhancement**: The Network Account is not currently used. It's reserved for potential centralized networking services like:
 - Transit Gateway for inter-VPC connectivity
 - Centralized NAT Gateways
 - Shared VPC endpoints
@@ -104,6 +103,8 @@ Note: Staging, Prod, and Network accounts are deferred by default for this tutor
 1. **Create initial AWS CLI configuration**:
    
    First, create an administrative IAM user following [AWS best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html). This user will exist outside the Control Tower implementation and be used throughout the deployment process.
+
+   Then create an Access Key ID and Secret Access Key for this user for the Command Line Interface (CLI) use case.
    
    Then create `~/.aws/config` with your admin user credentials:
    ```ini
