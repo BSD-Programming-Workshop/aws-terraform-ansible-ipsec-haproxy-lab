@@ -34,12 +34,12 @@
 
 - name: Set OS-specific variables
   set_fact:
-    package_manager: "{{ package_managers[detected_os] | default('unknown') }}"
-    service_manager: "{{ service_managers[detected_os] | default('unknown') }}"
-    python_package: "{{ python_packages[detected_os] | default('python3') }}"
-    ipsec_packages: "{{ ipsec_packages[detected_os] | default([]) }}"
-    ipsec_config_path: "{{ ipsec_config_paths[detected_os] | default('/etc/ipsec.conf') }}"
-    ipsec_service_name: "{{ ipsec_service_names[detected_os] | default('ipsec') }}"
+    package_manager: "{{ package_managers_map[detected_os] | default('unknown') }}"
+    service_manager: "{{ service_managers_map[detected_os] | default('unknown') }}"
+    python_package: "{{ python_packages_map[detected_os] | default('python3') }}"
+    ipsec_packages: "{{ ipsec_packages_map[detected_os] | default([]) }}"
+    ipsec_config_path: "{{ ipsec_config_paths_map[detected_os] | default('/etc/ipsec.conf') }}"
+    ipsec_service_name: "{{ ipsec_service_names_map[detected_os] | default('ipsec') }}"
   tags: always
 
 - name: Validate OS support

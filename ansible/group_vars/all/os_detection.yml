@@ -2,33 +2,33 @@
 # This file contains variables for OS-specific configuration
 
 # Default package managers by OS
-package_managers:
+package_managers_map:
   freebsd: pkg
   rhel: yum
 
 # Default service managers by OS
-service_managers:
+service_managers_map:
   freebsd: service
   rhel: systemctl
 
 # Python package names by OS
-python_packages:
+python_packages_map:
   freebsd: python311
   rhel: python3
 
 # IPSec package names by OS
-ipsec_packages:
+ipsec_packages_map:
   freebsd: 
     - strongswan
   rhel:
     - libreswan
 
 # Configuration file paths by OS
-ipsec_config_paths:
+ipsec_config_paths_map:
   freebsd: /usr/local/etc/ipsec.conf
   rhel: /etc/ipsec.conf
 
 # Service names by OS
-ipsec_service_names:
+ipsec_service_names_map:
   freebsd: strongswan
   rhel: ipsec
