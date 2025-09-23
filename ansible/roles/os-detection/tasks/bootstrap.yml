@@ -18,22 +18,24 @@
 # FreeBSD bootstrap
 - name: Install Python 3.11 on FreeBSD when missing
   raw: |
-    sudo pkg update -f -y || true
-    sudo pkg install -y python311
+    pkg update -f -y || true
+    pkg install -y python311
   when:
     - ansible_system == 'FreeBSD'
     - python_missing | bool
   changed_when: true
+  become: true
   tags: bootstrap
 
 # RHEL/CentOS bootstrap
 - name: Install Python 3 on RHEL when missing
   raw: |
-    sudo yum -y install python3 || sudo dnf -y install python3
+    yum -y install python3 || dnf -y install python3
   when:
     - ansible_os_family == 'RedHat'
     - python_missing | bool
   changed_when: true
+  become: true
   tags: bootstrap
 
 - name: Set ansible_python_interpreter for FreeBSD
