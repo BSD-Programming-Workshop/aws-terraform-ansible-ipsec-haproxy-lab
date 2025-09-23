@@ -22,6 +22,12 @@
   become: yes
   when: detected_os == "rhel"
 
+# FreeBSD: set strongSwan interface to stroke via sysrc
+- name: Configure strongSwan to use stroke interface (FreeBSD)
+  command: sysrc strongswan_interface=stroke
+  become: yes
+  when: detected_os == "freebsd"
+
 # Enable IPSec service
 - name: Enable IPSec service
   service:
