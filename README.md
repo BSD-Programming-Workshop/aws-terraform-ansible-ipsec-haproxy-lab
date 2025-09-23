@@ -471,6 +471,59 @@ For this tutorial, deploy Dev only. Staging/Prod are optional and require enabli
      ```
      before enabling the service. This matches the port message when installing `strongswan` on FreeBSD.
 
+   Verification and troubleshooting (FreeBSD swanctl/vici):
+   - Checklist before running the playbook:
+     - `ansible/group_vars/all/config` has:
+       - `aws_public_ip` (Terraform `freebsd_instance_public_ip`)
+       - `aws_private_ip_subnet` (e.g., `10.1.1.X/32`)
+       - `lab_public_ip` (your public IP)
+       - `lab_cidr` (your on‑prem CIDR, e.g., `10.66.6.0/24`)
+     - `ansible/group_vars/all/secrets` exists and is encrypted with Vault
+       - contains: `ipsec_secret: "YOUR-STRONG-PSK"`
+   - After playbook completes, on the FreeBSD host:
+     ```bash
+     # Service should be enabled and started
+     service strongswan status
+
+     # Load and inspect connections (swanctl/vici)
+     swanctl --load-all
+     swanctl --list-conns
+     swanctl --list-sas
+
+     # Confirm kernel IPsec module (usually auto-loaded)
+     kldstat -m ipsec || true
+     ```
+   - If connections don’t appear:
+     - Re-check `swanctl.conf` rendered values: `/usr/local/etc/swanctl/swanctl.conf`
+     - Confirm config variables in `ansible/group_vars/all/config`
+     - Ensure Vault secret exists: `ansible-vault view ansible/group_vars/all/secrets`
+     - Re-run just the ipsec role: `ansible-playbook playbook.yml -t ipsec --ask-vault-pass`
+
+   swanctl quick reference (FreeBSD):
+   ```bash
+   # Reload config and secrets after changes
+   swanctl --load-all
+
+   # List configured connections and active SAs
+   swanctl --list-conns
+   swanctl --list-sas
+
+   # Bring a connection down/up (names from swanctl.conf, e.g., lab-tunnel)
+   swanctl --terminate --ike lab-tunnel || true
+   swanctl --initiate --ike lab-tunnel
+
+   # Tail logs for troubleshooting
+   tail -f /var/log/secure /var/log/messages 2>/dev/null | grep -iE 'charon|ipsec|swanctl'
+   ```
+
+   Important: configure the remote peer as well
+   - This playbook configures only the FreeBSD AWS side. The on‑prem/lab peer must be configured to match:
+     - Same PSK as `ipsec_secret`
+     - Peer IDs as set in `swanctl.conf` (we use public IPs)
+     - Local/remote traffic selectors (`aws_private_ip_subnet` ↔ `lab_cidr`)
+     - Matching IKE/ESP proposals (`aes256-sha256-modp2048` in this example)
+   - If your peer is a Linux strongSwan, use `swanctl.conf` there with mirrored parameters. For other devices, map these values to their UI/CLI.
+
 ## Multi-OS Testing in Dev Environment
 
 The dev environment supports deploying both FreeBSD and RHEL instances simultaneously:
