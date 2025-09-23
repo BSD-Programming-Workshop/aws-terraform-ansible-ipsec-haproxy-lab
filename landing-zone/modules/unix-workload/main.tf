@@ -201,9 +201,6 @@ resource "aws_instance" "workload" {
     http_endpoint = "enabled"
   }
 
-  # Explicitly enable ENA for better compatibility/performance on Nitro/FreeBSD
-  ena_support = var.enable_ena
-
   tags = {
     Name        = "${var.environment}-${var.project_name}-${var.operating_system}"
     Environment = var.environment
