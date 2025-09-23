@@ -450,6 +450,27 @@ For this tutorial, deploy Dev only. Staging/Prod are optional and require enabli
      - `aws_public_ip`: the FreeBSD instance public IP. Get via Terraform output: `terraform -chdir=landing-zone/environments/dev output -raw freebsd_instance_public_ip`
      - `aws_private_ip_subnet`: the instance private IP in `/32` form (e.g., `10.1.1.123/32`). Find in EC2 console or with CLI: `aws ec2 describe-instances ... --query 'Reservations[0].Instances[0].PrivateIpAddress'`
 
+   Secrets and PSK (Ansible Vault):
+   - The IPsec secrets template reads `ipsec_secret` from `ansible/group_vars/all/secrets`.
+   - An example file is provided at `ansible/group_vars/all/secrets.example`.
+   - To set a PSK and keep it encrypted:
+     ```bash
+     cd ansible
+     cp group_vars/all/secrets.example group_vars/all/secrets
+     ansible-vault encrypt group_vars/all/secrets
+     ansible-vault edit group_vars/all/secrets   # set: ipsec_secret: "YOUR-STRONG-PSK"
+     # Run playbook with vault prompt or a password file
+     ansible-playbook playbook.yml --ask-vault-pass
+     # or: ansible-playbook --vault-password-file ~/.ansible/.vault_pass.txt playbook.yml
+     ```
+
+   FreeBSD strongSwan interface:
+   - The role configures strongSwan to use the `stroke` interface by running:
+     ```
+     sysrc strongswan_interface=stroke
+     ```
+     before enabling the service. This matches the port message when installing `strongswan` on FreeBSD.
+
 ## Multi-OS Testing in Dev Environment
 
 The dev environment supports deploying both FreeBSD and RHEL instances simultaneously:
