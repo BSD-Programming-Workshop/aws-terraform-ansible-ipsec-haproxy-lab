@@ -18,7 +18,7 @@ terraform {
 # Data sources for different OS AMIs
 data "aws_ssm_parameter" "freebsd_ami" {
   count = var.operating_system == "freebsd" ? 1 : 0
-  name  = "/aws/service/freebsd/amd64/base/zfs/14.3/RELEASE"
+  name  = var.freebsd_ssm_parameter
 }
 
 # For RedHat, we'll use a variable since you need to share gold images with your account
@@ -35,7 +35,7 @@ data "aws_ssm_parameter" "freebsd_ami" {
 
 locals {
   # Select AMI based on OS choice
-  selected_ami = var.operating_system == "freebsd" ? data.aws_ssm_parameter.freebsd_ami[0].value : var.custom_ami_id
+  selected_ami = var.custom_ami_id != "" ? var.custom_ami_id : (var.operating_system == "freebsd" ? data.aws_ssm_parameter.freebsd_ami[0].value : var.custom_ami_id)
   
   # OS-specific user data
   user_data_scripts = {
@@ -199,6 +199,14 @@ resource "aws_instance" "workload" {
   metadata_options {
     http_tokens   = var.metadata_http_tokens
     http_endpoint = "enabled"
+  }
+
+  # Match console behavior: allow opting into unlimited CPU credits for T-family
+  dynamic "credit_specification" {
+    for_each = var.enable_unlimited_cpu_credits ? [1] : []
+    content {
+      cpu_credits = "unlimited"
+    }
   }
 
   tags = {

@@ -35,6 +35,12 @@ variable "custom_ami_id" {
   default     = ""
 }
 
+variable "enable_unlimited_cpu_credits" {
+  description = "Opt-in to unlimited CPU credits for T-family instances"
+  type        = bool
+  default     = true
+}
+
 variable "workload_type" {
   description = "Type of workload being deployed"
   type        = string
