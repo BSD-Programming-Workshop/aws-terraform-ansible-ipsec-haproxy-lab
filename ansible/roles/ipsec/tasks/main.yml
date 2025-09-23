@@ -22,11 +22,24 @@
   become: yes
   when: detected_os == "rhel"
 
-# FreeBSD: set strongSwan interface to stroke via sysrc
-- name: Configure strongSwan to use stroke interface (FreeBSD)
-  command: sysrc strongswan_interface=stroke
+# FreeBSD: ensure swanctl directory and config (vici interface)
+- name: Ensure swanctl config directory exists (FreeBSD)
+  file:
+    path: /usr/local/etc/swanctl
+    state: directory
+    mode: '0755'
   become: yes
   when: detected_os == "freebsd"
+
+- name: Deploy swanctl.conf (FreeBSD)
+  template:
+    src: swanctl.conf
+    dest: /usr/local/etc/swanctl/swanctl.conf
+    mode: '0644'
+    backup: yes
+  become: yes
+  when: detected_os == "freebsd"
+  notify: restart ipsec
 
 # Enable IPSec service
 - name: Enable IPSec service
@@ -35,24 +48,17 @@
     enabled: yes
   become: yes
 
-# Configure IPSec
-- name: Configure IPSec
+# Configure IPSec (RHEL/Libreswan)
+- name: Configure IPSec (RHEL)
   template:
     src: ipsec.conf
     dest: "{{ ipsec_config_path }}"
     backup: yes
   become: yes
+  when: detected_os == "rhel"
   notify: restart ipsec
 
-- name: Configure IPSec secrets (FreeBSD)
-  template:
-    src: ipsec.secrets
-    dest: /usr/local/etc/ipsec.secrets
-    mode: '0600'
-    backup: yes
-  become: yes
-  when: detected_os == "freebsd"
-  notify: restart ipsec
+# FreeBSD uses swanctl secrets in swanctl.conf, not ipsec.secrets
 
 - name: Configure IPSec secrets (RHEL)
   template:
