@@ -197,9 +197,12 @@ resource "aws_instance" "workload" {
   user_data = local.user_data_scripts[var.operating_system]
 
   metadata_options {
-    http_tokens   = "required"
+    http_tokens   = var.metadata_http_tokens
     http_endpoint = "enabled"
   }
+
+  # Explicitly enable ENA for better compatibility/performance on Nitro/FreeBSD
+  ena_support = var.enable_ena
 
   tags = {
     Name        = "${var.environment}-${var.project_name}-${var.operating_system}"

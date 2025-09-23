@@ -87,3 +87,16 @@ variable "root_volume_type" {
   type        = string
   default     = "gp3"
 }
+
+# Instance compatibility settings
+variable "metadata_http_tokens" {
+  description = "IMDS requirement setting for instance metadata service (optional|required). FreeBSD AMIs may require optional."
+  type        = string
+  default     = "optional"
+}
+
+variable "enable_ena" {
+  description = "Whether to enable ENA support explicitly on the instance (recommended for modern FreeBSD/Nitro)."
+  type        = bool
+  default     = true
+}
