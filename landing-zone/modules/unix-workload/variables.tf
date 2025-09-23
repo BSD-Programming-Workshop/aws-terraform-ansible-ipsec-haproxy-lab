@@ -95,6 +95,19 @@ variable "root_volume_type" {
   default     = "gp3"
 }
 
+# Encryption toggle for root volume (console example used unencrypted)
+variable "root_encrypted" {
+  description = "Whether to encrypt the root EBS volume"
+  type        = bool
+  default     = false
+}
+
+# Control whether to send user_data at all (console example used none)
+variable "enable_user_data" {
+  description = "If true, render and send OS-specific user_data; if false, omit user_data"
+  type        = bool
+  default     = false
+}
 # Instance compatibility settings
 variable "metadata_http_tokens" {
   description = "IMDS requirement setting for instance metadata service (optional|required). FreeBSD AMIs may require optional."

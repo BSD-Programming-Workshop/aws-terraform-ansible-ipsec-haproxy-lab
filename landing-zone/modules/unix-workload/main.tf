@@ -187,10 +187,10 @@ resource "aws_instance" "workload" {
   root_block_device {
     volume_size = var.root_volume_size
     volume_type = var.root_volume_type
-    encrypted   = true
+    encrypted   = var.root_encrypted
   }
 
-  user_data = local.user_data_scripts[var.operating_system]
+  user_data = var.enable_user_data ? local.user_data_scripts[var.operating_system] : null
 
   metadata_options {
     http_tokens   = var.metadata_http_tokens
