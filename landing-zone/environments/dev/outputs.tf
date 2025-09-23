@@ -6,14 +6,9 @@ output "freebsd_vpc_id" {
   value       = module.freebsd_workload.vpc_id
 }
 
-output "freebsd_instance_id" {
-  description = "ID of the FreeBSD EC2 instance"
-  value       = module.freebsd_workload.instance_id
-}
-
 output "freebsd_instance_public_ip" {
   description = "Public IP address of the FreeBSD instance"
-  value       = module.freebsd_workload.instance_public_ip
+  value       = module.freebsd_workload.instance_ip
 }
 
 output "freebsd_ssh_command" {
@@ -22,14 +17,9 @@ output "freebsd_ssh_command" {
 }
 
 # RHEL outputs (conditional)
-output "rhel_instance_id" {
-  description = "ID of the RHEL EC2 instance"
-  value       = var.rhel_ami_id != null ? module.rhel_workload[0].instance_id : null
-}
-
 output "rhel_instance_public_ip" {
   description = "Public IP address of the RHEL instance"
-  value       = var.rhel_ami_id != null ? module.rhel_workload[0].instance_public_ip : null
+  value       = var.rhel_ami_id != null ? module.rhel_workload[0].instance_ip : null
 }
 
 output "rhel_ssh_command" {
