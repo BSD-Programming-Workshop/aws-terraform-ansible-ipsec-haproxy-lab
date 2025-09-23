@@ -82,13 +82,6 @@ variable "root_volume_type" {
   default     = "gp3"
 }
 
-# Workload module pass-throughs
-variable "freebsd_ssm_parameter" {
-  description = "SSM Parameter for FreeBSD AMI (ZFS or UFS). Example: /aws/service/freebsd/amd64/base/zfs/14.3/RELEASE or /aws/service/freebsd/amd64/base/ufs/14.3/RELEASE"
-  type        = string
-  default     = "/aws/service/freebsd/amd64/base/zfs/14.3/RELEASE"
-}
-
 variable "metadata_http_tokens" {
   description = "IMDS requirement (optional|required). Some FreeBSD images need optional to bootstrap."
   type        = string

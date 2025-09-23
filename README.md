@@ -290,22 +290,20 @@ Tips:
 
 3. **Set up MFA device and update AWS CLI configuration**:
    
-   Set up MFA device via AWS Console for your admin user, then update `~/.aws/config`:
-   ```ini
-   [profile bootstrap]
-  region = us-east-1
-  output = json
-  aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
-  aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
+   Set up MFA device via AWS Console for your admin user (you can find this in the menu under Security Credentials), then update `~/.aws/config`:
+   ```ini  
+   [profile mfa]
+   region = us-east-1
+   output = json
+   aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
+   aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
+   # Rename your bootstrap profile to mfa
   
-  [profile mfa]
-  region = us-east-1
-  output = json
-  aws_access_key_id = YOUR_ADMIN_USER_ACCESS_KEY_ID
-  aws_secret_access_key = YOUR_ADMIN_USER_SECRET_ACCESS_KEY
-  
-  [profile default]
-  region = us-east-1
+   [profile default]
+   region = us-east-1
+   aws_access_key_id = YOUR_MFA_ACCESS_KEY_ID
+   aws_secret_access_key = YOUR_MFA_SECRET_ACCESS_KEY
+   aws_session_token = YOUR_MFA_SESSION_TOKEN
    output = json
    # Temporary MFA session tokens go here (updated daily)
    ```
@@ -314,11 +312,54 @@ Tips:
    ```bash
    # Get MFA session token with your admin user
    aws sts get-session-token \
-     --serial-number arn:aws:iam::MANAGEMENT-ACCOUNT-ID:mfa/YOUR_ADMIN_USERNAME \
+     --serial-number YOUR_MFA_DEVICE_ARN \
      --profile mfa \
      --token-code 123456
    
    # Copy returned credentials to [profile default] section
+   ```
+
+5. **Logout of AWS Console and login again with MFA**
+
+   To set the AWS Console session to show MFA is enabled and not see access denied errors, logout of the AWS Console and login again with MFA. Remember, when you logged into the console earlier, you didn't have MFA configured so now that it's required, your current session will be denied because it doesn't meet the MFA requirement until you login again with MFA.
+
+6. **Validate access by assuming into Unix Dev (CLI)**
+
+   Before validating, unset AWS_PROFILE so the CLI uses your `[default]` profile with MFA session tokens. If `AWS_PROFILE` remains set (e.g., to `bootstrap`), the CLI may look for a profile that no longer exists.
+
+   Bash/zsh:
+   ```bash
+   # Ensure profiles don't interfere and clear any old session env creds
+   unset AWS_PROFILE AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+   ```
+
+   Fetch the Unix Dev account ID from Phase 1 outputs, then assume the role.
+
+   Bash/zsh (robust, no heredocs):
+   ```bash
+   DEV_ID="$(terraform -chdir=../phase1-foundation output -raw unix_dev_account_id)"
+   ARN="arn:aws:iam::${DEV_ID}:role/CrossAccountAdminRole"
+   echo "Assuming: $ARN"
+
+   read AKI SAK TOK <<<"$(aws sts assume-role \
+     --role-arn "$ARN" \
+     --role-session-name validate-dev \
+     --duration-seconds 3600 \
+     --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+     --output text)"
+
+   export AWS_ACCESS_KEY_ID="$AKI"
+   export AWS_SECRET_ACCESS_KEY="$SAK"
+   export AWS_SESSION_TOKEN="$TOK"
+
+   aws sts get-caller-identity
+   ```
+
+   You should receive temporary credentials. The last command should print the Unix Dev account ID.
+
+   Tip: When done, unset these environment variables so your shell falls back to the MFA `[default]` profile:
+   ```bash
+   unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
    ```
 
 ### Phase 3: Deploy Workloads to Isolated Accounts
@@ -327,18 +368,28 @@ Tips:
 
 For this tutorial, deploy Dev only. Staging/Prod are optional and require enabling those accounts in Phase 1 first (see "Enable Staging/Prod/Network later").
 
-1. **Configure environment variables**:
+1. **Subscribe and find FreeBSD AMI (one time per account)**
+   - Switch to Unix Dev in the console:
+     - https://signin.aws.amazon.com/switchrole?account=YOUR_DEV_ACCOUNT_ID&roleName=OrganizationAccountAccessRole&displayName=UnixDev
+   - Open AWS Marketplace (region us-east-1), search "FreeBSD 14" and click Continue to subscribe.
+   - Find the AMI ID in EC2 > AMIs for your region (e.g., ami-07a38014679e554b7 for us-east-1) and copy it.
+
+2. **Configure environment variables**:
    ```bash
    cd landing-zone/environments/dev
    cp terraform.tfvars.example terraform.tfvars
    # Edit terraform.tfvars with:
-   # - Account ID from phase1 outputs
+   # - Account ID from phase1 outputs (dev_account_id)
    # - Your SSH public key
-   # - Your workstation IP/CIDR
+   # - Your workstation IP/CIDR (use /32)
+   # - custom_ami_id = <FreeBSD AMI ID from console>
+   # - availability_zone = us-east-1b, instance_type = t3.micro (known-good)
+   # - metadata_http_tokens = required (matches console default)
+   # - root_volume_type = gp3, root_volume_size = 10+ GB
    # - Optional: rhel_ami_id to enable RHEL instance alongside FreeBSD
    ```
 
-2. **Deploy workload infrastructure** (uses cross-account role to target account):
+3. **Deploy workload infrastructure** (uses cross-account role to target account):
    ```bash
    # Use default profile with MFA session tokens
    terraform init -backend-config=backend.hcl
@@ -347,7 +398,11 @@ For this tutorial, deploy Dev only. Staging/Prod are optional and require enabli
    # If rhel_ami_id is set, also deploys RHEL instance in same VPC
    ```
 
-3. **(Optional) Staging environment** — only if enabled in Phase 1
+   Notes:
+   - First boot runs freebsd-update and triggers one automatic reboot. Give it several minutes before SSH.
+   - EC2 Serial Console is useful for debugging early boot. Enable it in the account if disabled.
+
+4. **(Optional) Staging environment** — only if enabled in Phase 1
    ```bash
    cd ../../environments/staging
    terraform init -backend-config=backend.hcl
@@ -355,7 +410,7 @@ For this tutorial, deploy Dev only. Staging/Prod are optional and require enabli
    terraform apply
    ```
 
-4. **(Optional) Production environment** — only if enabled in Phase 1
+5. **(Optional) Production environment** — only if enabled in Phase 1
    ```bash
    cd ../prod
    terraform init -backend-config=backend.hcl

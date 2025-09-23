@@ -45,7 +45,6 @@ module "freebsd_workload" {
   public_key          = var.public_key
   root_volume_size    = var.root_volume_size
   root_volume_type    = var.root_volume_type
-  freebsd_ssm_parameter = var.freebsd_ssm_parameter
   metadata_http_tokens  = var.metadata_http_tokens
 }
 
