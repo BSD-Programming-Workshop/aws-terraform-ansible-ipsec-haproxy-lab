@@ -46,6 +46,7 @@ module "freebsd_workload" {
   root_volume_size    = var.root_volume_size
   root_volume_type    = var.root_volume_type
   metadata_http_tokens  = var.metadata_http_tokens
+  custom_ami_id         = var.custom_ami_id
 }
 
 # Deploy RHEL workload (optional - set rhel_ami_id to enable)

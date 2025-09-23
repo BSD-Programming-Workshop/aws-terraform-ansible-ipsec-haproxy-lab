@@ -87,3 +87,10 @@ variable "metadata_http_tokens" {
   type        = string
   default     = "optional"
 }
+
+# AMI selection (REQUIRED for FreeBSD)
+variable "custom_ami_id" {
+  description = "Explicit AMI ID to use for the workload (required for FreeBSD)."
+  type        = string
+  default     = ""
+}
