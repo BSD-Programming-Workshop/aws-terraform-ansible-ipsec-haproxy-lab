@@ -418,39 +418,59 @@ For this tutorial, deploy Dev only. Staging/Prod are optional and require enabli
    terraform apply
    ```
 
+   Pre-step: SSH once to accept host key
+   ```bash
+   # Obtain SSH command for FreeBSD instance and connect once to accept the host key
+   terraform -chdir=landing-zone/environments/dev output -raw freebsd_ssh_command
+   # Copy/paste the printed SSH command to connect, accept the host key prompt, then exit
+   # Note: If you used a different private key path when creating the environment, adjust the -i flag accordingly.
+   # Alternatively, load your key into ssh-agent so you don't need -i each time:
+   eval "$(ssh-agent -s)" && ssh-add ~/.ssh/YOUR_PRIVATE_KEY
+   ssh ec2-user@$(terraform -chdir=landing-zone/environments/dev output -raw freebsd_instance_public_ip)
+   ```
+
 3. **Configure with Ansible**:
    ```bash
-   # Generate inventory from terraform output (includes all instances)
-   terraform output -raw ansible_inventory > ../../../ansible/inventory-dev
-   
-   # Run ansible playbook from project root
-   cd ../../../
-   ansible-playbook -i ansible/inventory-dev ansible/site.yml
-   # Automatically detects and configures FreeBSD and/or RHEL instances
+   # From the environment directory
+   # Generate inventory and write directly to ansible/hosts (ansible.cfg points to this file by default)
+   terraform output -raw ansible_inventory >> ../../../ansible/hosts
+
+   # Run Ansible from the ansible/ directory (uses ansible.cfg defaults)
+   cd ../../../ansible
+   ansible-playbook playbook.yml
+   # This playbook bootstraps Python on FreeBSD/RHEL, detects OS, and applies configuration
    ```
+
+   Ansible layout notes:
+   - `ansible/ansible.cfg` sets `inventory = hosts` and `remote_user = ec2-user`, so no `-i` flag is required.
+   - `ansible/group_vars/all/config` provides lab-specific values used by roles. Update these before running:
+     - `python_version`: leave `"3.11"` for FreeBSD 14.x
+     - `lab_cidr`: your on-prem/lab CIDR used for IPsec rules (example: `10.66.6.0/24`)
+     - `lab_public_ip`: your workstation or on-prem public IP (can match `workstation_cidr` in terraform.tfvars without `/32`)
+     - `aws_public_ip`: the FreeBSD instance public IP. Get via Terraform output: `terraform -chdir=landing-zone/environments/dev output -raw freebsd_instance_public_ip`
+     - `aws_private_ip_subnet`: the instance private IP in `/32` form (e.g., `10.1.1.123/32`). Find in EC2 console or with CLI: `aws ec2 describe-instances ... --query 'Reservations[0].Instances[0].PrivateIpAddress'`
 
 ## Multi-OS Testing in Dev Environment
 
 The dev environment supports deploying both FreeBSD and RHEL instances simultaneously:
 
-- **FreeBSD instance**: Always deployed (uses AWS SSM parameter for AMI)
+- **FreeBSD instance**: Always deployed
 - **RHEL instance**: Optional - set `rhel_ami_id` in `terraform.tfvars` to enable
 - **Same VPC**: Both instances share networking resources
-- **Different AZs**: FreeBSD in us-east-1a, RHEL in us-east-1b
 - **Unified Ansible**: Single playbook configures both OS types automatically
 
 ## Operating System Support
 
 The infrastructure supports both FreeBSD and RHEL:
 
-- **FreeBSD**: Uses dynamic AMI lookup via AWS SSM Parameter Store
-- **RHEL**: Uses custom AMI ID (required for gold images)
+- **FreeBSD**: Uses an explicit AMI ID (you must subscribe in AWS Marketplace, then copy the AMI ID from EC2 > AMIs)
+- **RHEL**: Uses a custom AMI ID (e.g., your gold image shared to the account)
 
 Configure in `terraform.tfvars`:
 ```hcl
 # For FreeBSD
 operating_system = "freebsd"
-custom_ami_id    = ""
+custom_ami_id    = "ami-xxxxxxxxxxxxxxxxx"  # Marketplace AMI ID you subscribed to
 
 # For RHEL (when you have gold image AMI)
 operating_system = "rhel"
@@ -478,11 +498,15 @@ Each environment deploys to isolated AWS accounts:
 After deployment, connect to your instance:
 
 ```bash
-# Get connection command from terraform output
-terraform output ssh_command
+# Get connection command for FreeBSD from terraform output
+terraform -chdir=landing-zone/environments/dev output -raw freebsd_ssh_command
 
 # Or manually:
-ssh -i ~/.ssh/your-key ec2-user@INSTANCE-IP
+ssh -i ~/.ssh/YOUR_PRIVATE_KEY ec2-user@INSTANCE-IP
+
+# Recommended: use ssh-agent so you don't have to pass -i repeatedly
+eval "$(ssh-agent -s)" && ssh-add ~/.ssh/YOUR_PRIVATE_KEY
+ssh ec2-user@INSTANCE-IP
 ```
 
 ## Security Features

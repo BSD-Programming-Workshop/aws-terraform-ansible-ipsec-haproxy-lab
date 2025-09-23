@@ -1,6 +1,10 @@
 ---
 # OS Detection and Setup Tasks
-# This role detects the operating system and sets up OS-specific variables
+# This role bootstraps Python if needed, then detects the operating system and sets up OS-specific variables
+
+- name: Bootstrap Python and prerequisites
+  import_tasks: bootstrap.yml
+  tags: [bootstrap, always]
 
 - name: Gather system facts
   setup:

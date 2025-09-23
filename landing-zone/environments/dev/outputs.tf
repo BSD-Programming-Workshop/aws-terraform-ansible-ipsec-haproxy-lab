@@ -32,3 +32,9 @@ output "ansible_inventory" {
   description = "Combined Ansible inventory for all instances"
   value = var.rhel_ami_id != null ? "${module.freebsd_workload.ansible_inventory}\n${module.rhel_workload[0].ansible_inventory}" : module.freebsd_workload.ansible_inventory
 }
+
+# Friendly reminder about FreeBSD first boot behavior
+output "freebsd_first_boot_note" {
+  description = "Reminder about FreeBSD first-boot behavior"
+  value       = "FreeBSD first boot runs freebsd-update and triggers one automatic reboot. Allow several minutes before SSH."
+}

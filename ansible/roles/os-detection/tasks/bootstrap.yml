@@ -1,0 +1,47 @@
+---
+# Bootstrap Python and prerequisites on target hosts before using normal modules
+# This runs with minimal assumptions and uses the raw module when Python is missing.
+
+- name: Detect if Python is already available
+  raw: |
+    command -v python3 || command -v python || echo "NO_PYTHON"
+  changed_when: false
+  register: python_probe
+  failed_when: false
+  tags: always
+
+- name: Set fact when python is missing
+  set_fact:
+    python_missing: "{{ 'NO_PYTHON' in (python_probe.stdout | default('')) }}"
+  tags: always
+
+# FreeBSD bootstrap
+- name: Install Python 3.11 on FreeBSD when missing
+  raw: |
+    sudo pkg update -f -y || true
+    sudo pkg install -y python311
+  when:
+    - ansible_system == 'FreeBSD'
+    - python_missing | bool
+  changed_when: true
+  tags: bootstrap
+
+# RHEL/CentOS bootstrap
+- name: Install Python 3 on RHEL when missing
+  raw: |
+    sudo yum -y install python3 || sudo dnf -y install python3
+  when:
+    - ansible_os_family == 'RedHat'
+    - python_missing | bool
+  changed_when: true
+  tags: bootstrap
+
+- name: Set ansible_python_interpreter for FreeBSD
+  set_fact:
+    ansible_python_interpreter: /usr/local/bin/python3.11
+  when: ansible_system == 'FreeBSD'
+  tags: bootstrap
+
+- name: Refresh facts after bootstrap
+  setup:
+  tags: bootstrap

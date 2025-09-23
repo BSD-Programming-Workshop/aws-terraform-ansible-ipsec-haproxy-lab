@@ -1,7 +1,7 @@
-# high level instructions for which tasks apply to which hosts
+# High-level instructions for which tasks apply to which hosts
 - name: apply local configuration to servers listed in hosts
-  gather_facts: false
   hosts: all
   roles:
+    - os-detection   # bootstraps Python and detects OS; must run first
     - ipsec
   become_method: su
