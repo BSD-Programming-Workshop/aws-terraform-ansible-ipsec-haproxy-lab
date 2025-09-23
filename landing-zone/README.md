@@ -30,4 +30,4 @@ landing-zone/
 ## Notes
 
 - Terminology: this repo uses "Unix Dev/Staging/Prod" naming consistently (OS-agnostic). The unix-workload module supports FreeBSD by default and optionally RHEL via a custom AMI ID.
-- For emails, MFA workflow, and common AWS gotchas (including Control Tower IAM propagation delay), refer to the root `README.md` and the student guide at `docs/eurobsdcon-tutorial.md`.
+- For emails, MFA workflow, and common AWS gotchas (including Control Tower IAM propagation delay), refer to the root `README.md`.

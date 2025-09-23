@@ -2,17 +2,10 @@
 
 This project creates a secure, scalable AWS Landing Zone using Control Tower with isolated accounts for deploying Unix workloads (FreeBSD or RHEL) configured with IPSec.
 
-## EuroBSDCon Tutorial Guide
-
-For a condensed student handout used during the EuroBSDCon session, see:
-
-- `docs/eurobsdcon-tutorial.md`
-
 ## At a glance
 
 - `landing-zone/environments/README.md` — environment deployments
 - `landing-zone/modules/unix-workload/` — reusable module
-- `docs/eurobsdcon-slides.md` — slide deck (Marp)
 
 ## Architecture Overview
 
