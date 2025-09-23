@@ -18,6 +18,11 @@ terraform {
   }
 }
 
+# Enable EC2 Serial Console for troubleshooting boot issues (account-level setting)
+resource "aws_ec2_serial_console_access" "enable" {
+  enabled = true
+}
+
 # Assume role in dev account
 provider "aws" {
   region = var.aws_region
@@ -34,7 +39,6 @@ module "freebsd_workload" {
   environment          = "dev"
   project_name         = var.project_name
   operating_system     = "freebsd"
-  custom_ami_id        = null
   workload_type        = "ipsec-server-freebsd"
   aws_region          = var.aws_region
   availability_zone   = var.availability_zone
