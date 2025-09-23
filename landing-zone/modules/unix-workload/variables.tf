@@ -5,6 +5,13 @@ variable "environment" {
   type        = string
 }
 
+# Allow switching FreeBSD AMI channel (e.g., ZFS vs UFS) via SSM parameter
+variable "freebsd_ssm_parameter" {
+  description = "SSM Parameter name for FreeBSD AMI (e.g., /aws/service/freebsd/amd64/base/zfs/14.3/RELEASE or /aws/service/freebsd/amd64/base/ufs/14.3/RELEASE)"
+  type        = string
+  default     = "/aws/service/freebsd/amd64/base/ufs/14.3/RELEASE"
+}
+
 variable "project_name" {
   description = "Name of the project for resource naming"
   type        = string
