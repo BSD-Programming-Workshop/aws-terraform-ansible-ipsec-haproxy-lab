@@ -32,7 +32,7 @@
 # Configure IPSec
 - name: Configure IPSec
   template:
-    src: ipsec.conf.j2
+    src: ipsec.conf
     dest: "{{ ipsec_config_path }}"
     backup: yes
   become: yes
@@ -40,7 +40,7 @@
 
 - name: Configure IPSec secrets (FreeBSD)
   template:
-    src: ipsec.secrets.j2
+    src: ipsec.secrets
     dest: /usr/local/etc/ipsec.secrets
     mode: '0600'
     backup: yes
@@ -50,7 +50,7 @@
 
 - name: Configure IPSec secrets (RHEL)
   template:
-    src: ipsec.secrets.j2
+    src: ipsec.secrets
     dest: /etc/ipsec.secrets
     mode: '0600'
     backup: yes
