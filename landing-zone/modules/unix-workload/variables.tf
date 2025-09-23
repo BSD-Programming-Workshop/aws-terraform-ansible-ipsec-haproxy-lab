@@ -9,7 +9,7 @@ variable "environment" {
 variable "freebsd_ssm_parameter" {
   description = "SSM Parameter name for FreeBSD AMI (e.g., /aws/service/freebsd/amd64/base/zfs/14.3/RELEASE or /aws/service/freebsd/amd64/base/ufs/14.3/RELEASE)"
   type        = string
-  default     = "/aws/service/freebsd/amd64/base/ufs/14.3/RELEASE"
+  default     = "/aws/service/marketplace/prod-hddryn4bawlo2/14.3-release"
 }
 
 variable "project_name" {
