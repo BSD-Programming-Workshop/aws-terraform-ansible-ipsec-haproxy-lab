@@ -94,3 +94,16 @@ variable "custom_ami_id" {
   type        = string
   default     = ""
 }
+
+# Mirror console behavior toggles
+variable "root_encrypted" {
+  description = "Whether to encrypt the root EBS volume (console example was false)"
+  type        = bool
+  default     = false
+}
+
+variable "enable_user_data" {
+  description = "If true, send user_data; console example used none, so default false"
+  type        = bool
+  default     = false
+}
