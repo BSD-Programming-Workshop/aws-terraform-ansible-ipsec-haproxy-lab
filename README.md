@@ -556,9 +556,9 @@ If you use Red Hat gold images, the AMI IDs must be shared to your specific AWS 
 ## Environment Isolation
 
 Each environment deploys to isolated AWS accounts:
-- **Dev**: 10.1.0.0/16 VPC, t3.large instance
-- **Staging**: 10.2.0.0/16 VPC, t3.large instance  
-- **Production**: 10.3.0.0/16 VPC, t3.xlarge instance
+- **Dev**: 10.1.0.0/16 VPC, t3.micro instance (cost-effective for workshops)
+- **Staging**: 10.2.0.0/16 VPC, t3.micro instance (cost-effective for workshops)  
+- **Production**: 10.3.0.0/16 VPC, t3.micro instance (cost-effective for workshops)
 
 ## SSH Access
 
@@ -646,6 +646,14 @@ Keep costs predictable for workshops and personal sandboxes.
 - **Avoid expensive networking**: This repo does not create NAT Gateways or NLBs by default. Continue to avoid them for cost control.
 - **S3 lifecycle for state**: The bootstrap state bucket expires noncurrent versions after 30 days and aborts incomplete uploads after 7 days to limit storage costs.
 
+### Teardown after the session
+
+Run from the environment directory you deployed (e.g., `landing-zone/environments/dev`):
+
+```bash
+terraform destroy
+```
+
 ### Control Tower log lifecycle (optional)
 
 After Phase 1, you can transition Control Tower log bucket objects to Glacier after 7 days. Do this from a shell after switching role into the Log Archive account.
@@ -725,24 +733,3 @@ After completing all phases, your daily workflow uses your existing admin user w
 - **State Management**: Each component (bootstrap, phase1, phase2, environments) has its own Terraform state
 - **Account Access**: Workload deployments use cross-account roles, not direct credentials
 - **Environment Promotion**: Deploy to dev first, then promote configurations to staging and production
-
-
-## Cost Controls and Teardown
-
-Keep costs predictable for workshops and personal sandboxes.
-
-- **Use Dev only for demos**: Skip staging/prod until needed.
-- **Small instances**: In `landing-zone/environments/*/terraform.tfvars`, set:
-  - `instance_type = "t3.micro"`
-  - `root_volume_size = 8` or `10`
-- **RHEL gold images**: If you have prepaid RHEL AMI IDs from your Red Hat portal, use them as needed.
-- **Short-lived environments**: Create during the workshop; destroy immediately after.
-- **Avoid expensive networking**: This repo does not create NAT Gateways or NLBs by default. Continue to avoid them for cost control.
-- **S3 lifecycle for state**: The bootstrap state bucket expires noncurrent versions after 30 days and aborts incomplete uploads after 7 days to limit storage costs.
-
-### Teardown after the session
-
-Run from the environment directory you deployed (e.g., `landing-zone/environments/dev`):
-
-```bash
-terraform destroy
